@@ -1,73 +1,63 @@
-# Welcome to your Lovable project
+# Daily Journal
 
-## Project info
+A modern, responsive daily journaling application built with React, TypeScript, and Vite. It allows users to write daily entries, view past entries, and get a monthly summary of their journaling habits.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Dashboard:** Overview of your journal entries.
+- **New Entry:** Write and save a new journal entry for the day.
+- **View & Edit:** Read past entries and make changes if needed.
+- **Monthly Summary:** View summaries and statistics of your monthly journaling activities.
+- **Settings:** Customize your journaling experience.
+- **Responsive Design:** Optimized for both desktop and mobile viewing.
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Framework:** React 18, Vite
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **UI Components:** shadcn/ui (Radix UI)
+- **Routing:** React Router DOM
+- **Data Fetching:** React Query (@tanstack/react-query)
+- **Forms & Validation:** React Hook Form + Zod
+- **Icons & Utilities:** lucide-react, date-fns, sonner, recharts
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+Follow these steps to set up the project locally.
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Ensure you have Node.js and npm (or bun) installed.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Installation
 
-Follow these steps:
+1. **Clone the repository:**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd daily-journal
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   bun install
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   # or
+   bun run dev
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+4. Open your browser and navigate to `http://localhost:5173` (or the URL provided in the terminal).
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Scripts
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the app for production.
+- `npm run lint`: Runs ESLint to find and fix issues.
+- `npm run preview`: Previews the production build locally.
+- `npm run test`: Runs tests using Vitest.
