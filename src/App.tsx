@@ -24,19 +24,19 @@ const App = () => (
         <AppProvider>
           <BrowserRouter>
             <TopNav />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/new" element={<NewEntry />} />
-            <Route path="/entry/:date" element={<ViewEntry />} />
-            <Route path="/entry/:date/edit" element={<EditEntry />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/month-summary" element={<MonthlySummary />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <BottomNav />
-        </BrowserRouter>
-      </AppProvider>
-    </TooltipProvider>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/new" element={<NewEntry />} />
+              <Route path="/entry/:date" element={<ViewEntry />} />
+              <Route path="/entry/:date/edit" element={<EditEntry />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/month-summary" element={<MonthlySummary />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <BottomNav />
+          </BrowserRouter>
+        </AppProvider>
+      </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
