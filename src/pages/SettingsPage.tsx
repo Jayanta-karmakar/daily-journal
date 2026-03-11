@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, LogOut } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, LogOut, Wallet, Palette, Save } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/data/calculations';
 import { toast } from 'sonner';
 import { useTheme } from '@/components/theme-provider';
+import { ImportSection } from '@/components/import/ImportSection';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const SettingsPage = () => {
       dailySpendLimit: parseInt(limit) || 0,
       monthlyBudget: parseInt(budget) || 0,
     });
-    toast.success('Settings saved!');
+    toast.success('Settings saved successfully!');
   };
 
   const handleLogout = async () => {
@@ -31,95 +32,130 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
-            <ArrowLeft size={16} className="inline mr-1" /> Back
+    <div className="w-full max-w-6xl mx-auto px-4 md:px-8 py-8 pb-24 md:pb-12">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="p-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors bg-card shadow-sm">
+            <ArrowLeft size={18} />
           </button>
-          <h1 className="text-xl font-bold text-foreground">⚙️ Settings</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+            <p className="text-sm text-muted-foreground hidden sm:block">Manage your app preferences and data</p>
+          </div>
         </div>
-        <button onClick={handleLogout} className="px-3 py-2 rounded-lg border border-destructive/50 text-destructive text-sm font-medium hover:bg-destructive/10 transition-colors flex items-center gap-2">
-          <LogOut size={16} /> Logout
+        <button onClick={handleLogout} className="px-4 py-2.5 rounded-xl border border-destructive/20 bg-destructive/10 text-destructive text-sm font-semibold hover:bg-destructive hover:text-destructive-foreground transition-all flex items-center gap-2">
+          <LogOut size={16} /> <span className="hidden sm:inline">Logout</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column */}
-        <div className="flex flex-col gap-6">
-          <section className="bg-card rounded-xl border border-border p-5 shadow-sm">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">💰 Budget Configuration</h2>
-            
-            <div className="space-y-4">
-              <label className="block">
-                <span className="text-sm font-semibold text-primary">Monthly Salary (₹)</span>
-                <input type="number" value={salary} onChange={(e) => setSalary(e.target.value)}
-                  className="w-full mt-1 px-3 py-3 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-                <span className="text-xs text-muted-foreground mt-1 inline-block">Your monthly take-home salary.</span>
-              </label>
-
-              <label className="block">
-                <span className="text-sm font-semibold text-primary">Daily Spend Limit (₹)</span>
-                <input type="number" value={limit} onChange={(e) => setLimit(e.target.value)}
-                  className="w-full mt-1 px-3 py-3 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-                <span className="text-xs text-muted-foreground mt-1 inline-block">Entries exceeding this will be flagged as over-limit.</span>
-              </label>
-
-              <label className="block">
-                <span className="text-sm font-semibold text-primary">Monthly Budget (₹)</span>
-                <input type="number" value={budget} onChange={(e) => setBudget(e.target.value)}
-                  className="w-full mt-1 px-3 py-3 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-                <span className="text-xs text-muted-foreground mt-1 inline-block">Total monthly spending budget (Need + Want only).</span>
-              </label>
+      <div className="space-y-8">
+        {/* BUDGET CONFIGURATION */}
+        <section className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div className="p-5 sm:p-6 border-b border-border bg-muted/10 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+               <div className="p-2.5 bg-primary/10 text-primary rounded-xl hidden sm:block">
+                  <Wallet size={20} />
+               </div>
+               <div>
+                 <h2 className="text-base sm:text-lg font-bold text-foreground">Budget Configuration</h2>
+                 <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Manage your monthly financial plan</p>
+               </div>
             </div>
-          </section>
-        </div>
+          </div>
+          <div className="p-6 md:p-8">
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <label className="block">
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-3 block">Monthly Salary</span>
+                  <div className="relative group">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">₹</span>
+                    <input type="number" value={salary} onChange={(e) => setSalary(e.target.value)}
+                      className="w-full pl-9 pr-4 py-4 rounded-2xl border border-border bg-background text-base font-black focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-inner" />
+                  </div>
+                  <div className="flex justify-between items-center mt-3 px-1">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Net take-home</span>
+                    <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(salary) || 0)}</span>
+                  </div>
+                </label>
 
-        {/* Right Column */}
-        <div className="flex flex-col gap-6">
-          <section className="bg-card rounded-xl border border-border p-5 shadow-sm">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-primary mb-3">ℹ️ Current Values</h2>
-            <div className="space-y-4 text-sm mt-4">
-              <div className="flex justify-between items-center pb-2 border-b border-border/50"><span className="text-muted-foreground">Salary</span><span className="font-semibold text-lg">{formatCurrency(parseInt(salary) || 0)}</span></div>
-              <div className="flex justify-between items-center pb-2 border-b border-border/50"><span className="text-muted-foreground">Daily Limit</span><span className="font-semibold text-lg">{formatCurrency(parseInt(limit) || 0)}</span></div>
-              <div className="flex justify-between items-center"><span className="text-muted-foreground">Monthly Budget</span><span className="font-semibold text-lg">{formatCurrency(parseInt(budget) || 0)}</span></div>
-            </div>
-          </section>
+                <label className="block">
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-3 block">Daily Spend Limit</span>
+                  <div className="relative group">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">₹</span>
+                    <input type="number" value={limit} onChange={(e) => setLimit(e.target.value)}
+                      className="w-full pl-9 pr-4 py-4 rounded-2xl border border-border bg-background text-base font-black focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-inner" />
+                  </div>
+                  <div className="flex justify-between items-center mt-3 px-1">
+                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Threshold flag</span>
+                     <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(limit) || 0)}</span>
+                  </div>
+                </label>
 
-          <section className="bg-card rounded-xl border border-border p-5 shadow-sm">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">🎨 Appearance</h2>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-sm font-semibold text-primary block">Theme</span>
-                <span className="text-xs text-muted-foreground">Switch between light and dark themes.</span>
-              </div>
-              <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="p-3 rounded-lg border border-border hover:bg-muted transition-colors flex items-center gap-2"
-              >
-                {theme === 'dark' ? (
-                  <>
-                    <Sun size={18} />
-                    <span className="text-sm font-medium">Light Mode</span>
-                  </>
-                ) : (
-                  <>
-                    <Moon size={18} />
-                    <span className="text-sm font-medium">Dark Mode</span>
-                  </>
-                )}
-              </button>
+                <label className="block">
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-3 block">Monthly Budget</span>
+                   <div className="relative group">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">₹</span>
+                    <input type="number" value={budget} onChange={(e) => setBudget(e.target.value)}
+                      className="w-full pl-9 pr-4 py-4 rounded-2xl border border-border bg-background text-base font-black focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-inner" />
+                  </div>
+                  <div className="flex justify-between items-center mt-3 px-1">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Combined (N+W)</span>
+                    <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(budget) || 0)}</span>
+                  </div>
+                </label>
+             </div>
+             
+             <div className="mt-8 flex justify-end">
+               <button onClick={handleSave} className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all shadow-sm flex items-center gap-2">
+                 <Save size={18} />
+                 Save Budget Settings
+               </button>
+             </div>
+          </div>
+        </section>
+
+        {/* APPEARANCE */}
+        <section className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div className="p-5 sm:p-6 border-b border-border bg-muted/10 flex items-center gap-4">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl hidden sm:block">
+              <Palette size={20} />
             </div>
-          </section>
-        </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-foreground">Appearance</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Customize the app's visual style</p>
+            </div>
+          </div>
+          
+          <div className="p-6 md:p-8">
+             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4 max-w-lg">
+               <div>
+                 <span className="text-sm font-bold text-foreground block">App Theme</span>
+                 <span className="text-xs text-muted-foreground">Switch between light and dark modes.</span>
+               </div>
+               <button
+                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                 className="px-5 py-3 w-full sm:w-auto rounded-xl border border-border bg-background hover:bg-muted transition-all flex items-center justify-center gap-2 font-semibold shadow-sm text-sm"
+               >
+                 {theme === 'dark' ? (
+                   <>
+                     <Sun size={18} />
+                     Light Mode
+                   </>
+                 ) : (
+                   <>
+                     <Moon size={18} />
+                     Dark Mode
+                   </>
+                 )}
+               </button>
+             </div>
+          </div>
+        </section>
+
+        {/* DATA & INTEGRATIONS - Import Section */}
+        <ImportSection />
+
       </div>
-
-      <button onClick={handleSave}
-        className="w-full mt-6 py-4 rounded-lg bg-primary text-primary-foreground font-semibold text-base hover:bg-primary/90 transition-colors shadow-md">
-        💾 Save Settings
-      </button>
-      <p className="text-center text-xs text-muted-foreground mt-2">Changes are synced to your account.</p>
     </div>
   );
 };
