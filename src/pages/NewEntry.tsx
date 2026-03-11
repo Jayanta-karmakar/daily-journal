@@ -18,7 +18,7 @@ const emptyRow = (): ExpenseForm => ({ amount: '', label: '', type: 'need' });
 
 const NewEntry = () => {
   const navigate = useNavigate();
-  const { config, addEntry } = useAppContext();
+  const { config, addEntry, entries } = useAppContext();
 
   const today = new Date().toISOString().split('T')[0];
   const [date, setDate] = useState(today);
@@ -55,6 +55,14 @@ const NewEntry = () => {
     const errs: Record<string, string> = {};
     if (!date) errs.date = 'Date is required';
     if (!journal || journal.length < 10) errs.journal = 'Journal must be at least 10 characters';
+    
+    // Check if entry already exists for this date
+    const entryExists = entries.some(entry => entry.date === date);
+    if (entryExists) {
+      toast.error(`An entry for ${date} already exists. Please edit the existing entry instead.`);
+      errs.date = 'Entry already exists for this date';
+    }
+
     expenses.forEach((row, i) => {
       const amt = parseFloat(row.amount);
       if (amt > 0 && !row.label.trim()) errs[`exp-${i}`] = 'Label required when amount is entered';

@@ -13,7 +13,10 @@ import EditEntry from "./pages/EditEntry";
 import SettingsPage from "./pages/SettingsPage";
 import MonthlySummary from "./pages/MonthlySummary";
 import NotFound from "./pages/NotFound";
+import { Navigate } from "react-router-dom";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +28,16 @@ const AppContent = () => {
   }
   
   if (!session) {
-    return <Login />;
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </BrowserRouter>
+    );
   }
 
   return (
@@ -38,6 +50,8 @@ const AppContent = () => {
         <Route path="/entry/:date/edit" element={<EditEntry />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/month-summary" element={<MonthlySummary />} />
+        <Route path="/login" element={<Navigate to="/" />} />
+        <Route path="/register" element={<Navigate to="/" />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <BottomNav />

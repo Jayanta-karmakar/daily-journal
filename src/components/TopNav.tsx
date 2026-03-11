@@ -1,12 +1,17 @@
-import { NavLink, useLocation } from 'react-router-dom';
-import { Home, PenSquare, BarChart3, Settings } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Home, PenSquare, BarChart3, Settings, User } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import { useAppContext } from '@/context/AppContext';
 
 const TopNav = () => {
+  const { session } = useAppContext();
+  
   const linkClass = (isActive: boolean) =>
     `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
       isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'
     }`;
+
+  const displayName = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'User';
 
   return (
     <nav className="flex items-center justify-between gap-1 bg-card border-b border-border px-4 md:px-6 py-3 sticky top-0 z-50">
@@ -28,7 +33,13 @@ const TopNav = () => {
           <Settings size={16} /> Settings
         </NavLink>
       </div>
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-3">
+        {session && (
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full border border-border">
+            <User size={14} className="text-muted-foreground" />
+            <span className="text-xs font-semibold text-foreground truncate max-w-[120px]">{displayName}</span>
+          </div>
+        )}
         <ThemeToggle />
       </div>
     </nav>
