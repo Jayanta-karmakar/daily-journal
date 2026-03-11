@@ -24,7 +24,7 @@ const Dashboard = () => {
   const sorted = [...entries].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
-    <div className="max-w-[900px] mx-auto px-4 py-6 pb-24 md:pb-6">
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -38,32 +38,35 @@ const Dashboard = () => {
       </div>
 
       {/* Stats */}
-      <div className="flex gap-3 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <StatsCard label="Salary" value={config.salary} />
         <StatsCard label="Spent" value={totalSpend} variant="danger" />
         <StatsCard label="Invested" value={totalInvested} variant="investment" />
         <StatsCard label="Remaining" value={remaining} variant="success" />
       </div>
 
-      {/* Budget Bar */}
-      <div className="mb-4">
-        <BudgetBar spent={totalSpend} budget={config.monthlyBudget} />
-      </div>
+      {/* Budget + Gym row on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        {/* Budget Bar */}
+        <div>
+          <BudgetBar spent={totalSpend} budget={config.monthlyBudget} />
+        </div>
 
-      {/* Gym Stats */}
-      <div className="bg-card rounded-xl border border-border p-4 shadow-sm mb-4">
-        <div className="flex gap-6 flex-wrap">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Gym this month</p>
-            <p className="text-lg font-bold text-foreground">💪 {gymDays} / {workingDays} days</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Current streak</p>
-            <p className="text-lg font-bold text-foreground">🔥 {currentStreak} days</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Best streak</p>
-            <p className="text-lg font-bold text-foreground">🏆 {bestStreak} days</p>
+        {/* Gym Stats */}
+        <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Gym this month</p>
+              <p className="text-lg font-bold text-foreground">💪 {gymDays} / {workingDays}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Current streak</p>
+              <p className="text-lg font-bold text-foreground">🔥 {currentStreak} days</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Best streak</p>
+              <p className="text-lg font-bold text-foreground">🏆 {bestStreak} days</p>
+            </div>
           </div>
         </div>
       </div>
@@ -77,7 +80,7 @@ const Dashboard = () => {
 
       {/* Entries */}
       <h2 className="text-lg font-bold text-foreground mb-3">📝 Entries — March 2026</h2>
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         {sorted.map((entry) => (
           <EntryCard key={entry.id} entry={entry} />
         ))}

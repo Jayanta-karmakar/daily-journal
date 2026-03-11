@@ -45,7 +45,7 @@ const ViewEntry = () => {
   };
 
   return (
-    <div className="max-w-[900px] mx-auto px-4 py-6 pb-24 md:pb-6">
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-6">
       <div className="flex justify-between items-center mb-6">
         <button onClick={() => navigate('/')} className="px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
           <ArrowLeft size={16} className="inline mr-1" /> Back
