@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Dumbbell, ShieldCheck, Wallet, Sparkles, Activity, CheckCircle2, ArrowRight } from 'lucide-react';
+import { BookOpen, Dumbbell, ShieldCheck, Wallet, Sparkles, Activity, CheckCircle2, ArrowRight, FileUp, Download, Github, Twitter, Mail } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) => (
@@ -48,7 +48,7 @@ export default function Landing() {
           
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-foreground tracking-tight leading-[1.1] mb-8">
             Master your day. <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Log your life.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-500 to-indigo-600">Log your life.</span>
           </h1>
           
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10">
@@ -56,7 +56,7 @@ export default function Landing() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
-            <Link to="/register" className="px-8 py-4 rounded-full bg-primary text-primary-foreground text-base font-bold hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/30 flex items-center justify-center gap-2">
+            <Link to="/register" className="px-8 py-4 rounded-full bg-primary text-primary-foreground text-base font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
               Start your journey <ArrowRight size={18} />
             </Link>
             <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 py-4 rounded-full bg-card border border-border text-foreground text-base font-bold hover:bg-muted transition-all flex items-center justify-center">
@@ -68,80 +68,81 @@ export default function Landing() {
           <div className="mt-20 w-full max-w-5xl mx-auto relative group perspective-1000">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-blue-500/30 rounded-[2rem] blur-2xl opacity-50 group-hover:opacity-70 transition duration-1000 -z-10"></div>
             
-            <div className="relative bg-background/90 backdrop-blur-xl border border-border/80 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col transform transition-transform duration-700 hover:scale-[1.01]">
+            <div className="relative bg-background/95 backdrop-blur-xl border border-border rounded-[2rem] shadow-2xl overflow-hidden flex flex-col transform transition-transform duration-700 hover:scale-[1.01]">
               
               {/* Mock Window Header */}
               <div className="h-14 border-b border-border bg-muted/30 flex items-center px-5 gap-3">
-                <div className="flex gap-2.5">
-                  <div className="w-3.5 h-3.5 rounded-full bg-red-500/80 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
-                  <div className="w-3.5 h-3.5 rounded-full bg-yellow-500/80 shadow-[0_0_10px_rgba(234,179,8,0.5)]"></div>
-                  <div className="w-3.5 h-3.5 rounded-full bg-green-500/80 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-destructive/80 shadow-[0_0_8px_rgba(var(--destructive),0.4)]"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/80 shadow-[0_0_8px_rgba(234,179,8,0.4)]"></div>
+                  <div className="w-3 h-3 rounded-full bg-success/80 shadow-[0_0_8px_rgba(var(--success),0.4)]"></div>
                 </div>
                 <div className="ml-4 w-64 h-7 bg-background rounded-md border border-border/50 flex items-center px-4">
-                  <div className="w-32 h-2 bg-muted-foreground/30 rounded-full flex items-center gap-2">
-                     <span className="text-[10px] text-muted-foreground/50 font-medium">app.mydiary.com</span>
-                  </div>
+                  <div className="w-full text-[10px] text-muted-foreground/60 font-medium truncate">app.mydiary.com/dashboard</div>
                 </div>
               </div>
               
               {/* Mock Window Content */}
-              <div className="p-6 sm:p-10 grid grid-cols-1 md:grid-cols-3 gap-6 text-left bg-gradient-to-b from-transparent to-muted/10">
+              <div className="p-6 sm:p-10 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
                 {/* Mock Card 1: Daily Spend */}
-                <div className="md:col-span-2 bg-card rounded-2xl border border-border p-6 flex flex-col gap-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="md:col-span-2 bg-card rounded-2xl border border-border p-6 flex flex-col gap-5 shadow-sm">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-inner">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                         <Wallet size={24} />
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-muted-foreground mb-1 uppercase tracking-wider">Today's Spend</div>
-                        <div className="text-2xl font-black text-foreground">$42.50</div>
+                        <div className="text-[10px] font-black text-muted-foreground mb-1 uppercase tracking-widest">Today's Spend</div>
+                        <div className="text-2xl font-black text-foreground">₹2,363</div>
                       </div>
                     </div>
-                    <div className="px-4 py-1.5 bg-green-500/10 text-green-500 rounded-full text-xs font-bold border border-green-500/20">
-                      Under Budget
+                    <div className="px-3 py-1 bg-success/10 text-success text-[10px] font-black tracking-widest uppercase rounded-full border border-success/20">
+                      Healthy
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <div className="flex justify-between text-xs font-semibold text-muted-foreground">
-                       <span>Limit: $100.00</span>
-                       <span>42%</span>
+                    <div className="flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+                       <span>Daily limit: ₹5,000</span>
+                       <span>47%</span>
                     </div>
-                    <div className="h-3 bg-muted rounded-full overflow-hidden border border-border/50">
-                      <div className="h-full w-[42%] bg-gradient-to-r from-primary to-blue-500 rounded-full shadow-[inset_0_-2px_4px_rgba(0,0,0,0.1)]"></div>
+                    <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full w-[47%] bg-primary rounded-full shadow-inner"></div>
                     </div>
                   </div>
                 </div>
                 
                 {/* Mock Card 2: Gym */}
-                <div className="bg-card rounded-2xl border border-border p-6 flex flex-col justify-center items-center gap-3 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-                   <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full blur-2xl pointer-events-none"></div>
-                   <div className="w-16 h-16 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center mb-2 ring-4 ring-green-500/5 relative z-10">
+                <div className="bg-card rounded-2xl border border-border p-6 flex flex-col justify-center items-center gap-3 shadow-sm relative overflow-hidden group/item">
+                   <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+                   <div className="w-16 h-16 rounded-full bg-success/10 text-success flex items-center justify-center mb-1 relative z-10 border border-success/20 shadow-lg shadow-success/10">
                      <CheckCircle2 size={32} />
                    </div>
-                   <div className="text-lg font-bold text-foreground relative z-10">Gym Time</div>
-                   <div className="text-sm font-medium text-muted-foreground relative z-10">Completed</div>
+                   <div className="text-base font-black text-foreground relative z-10 uppercase tracking-tight">Gym Time</div>
+                   <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest relative z-10">Session Logged</div>
                 </div>
                 
                 {/* Mock Journal Entry */}
-                <div className="md:col-span-3 bg-card rounded-2xl border border-border p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-                  <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
-                  <div className="flex justify-between items-center mb-2">
+                <div className="md:col-span-3 bg-card rounded-2xl border border-border p-6 flex flex-col gap-5 shadow-sm relative overflow-hidden">
+                  <div className="flex justify-between items-end">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center">
                         <BookOpen size={20} />
                       </div>
                       <div>
-                         <div className="text-sm font-bold text-foreground">Dear Diary</div>
-                         <div className="text-xs text-muted-foreground font-medium">Today, 9:41 AM</div>
+                         <div className="text-sm font-black text-foreground uppercase tracking-tight">Daily Reflection</div>
+                         <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">March 12, 2026</div>
                       </div>
                     </div>
+                    <div className="flex gap-2">
+                       <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-[10px]">✨</div>
+                       <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-[10px]">🏠</div>
+                    </div>
                   </div>
-                  <div className="space-y-3 pl-2 border-l-2 border-border/50 py-1">
-                    <div className="w-full h-3 bg-muted-foreground/20 rounded-full"></div>
-                    <div className="w-[90%] h-3 bg-muted-foreground/20 rounded-full"></div>
-                    <div className="w-[95%] h-3 bg-muted-foreground/20 rounded-full"></div>
-                    <div className="w-[60%] h-3 bg-muted-foreground/20 rounded-full"></div>
+                  <div className="space-y-3 py-1">
+                    <div className="w-full h-2.5 bg-muted rounded-full opacity-60"></div>
+                    <div className="w-[90%] h-2.5 bg-muted rounded-full opacity-60"></div>
+                    <div className="w-[95%] h-2.5 bg-muted rounded-full opacity-60"></div>
+                    <div className="w-[40%] h-2.5 bg-primary/20 rounded-full"></div>
                   </div>
                 </div>
               </div>
@@ -178,6 +179,93 @@ export default function Landing() {
                 title="Privacy First" 
                 desc="Extremely secure. Isolated tenant architecture means absolutely nobody else sees your entries." 
               />
+            </div>
+          </div>
+        </section>
+
+        {/* CSV Import Showcase Section */}
+        <section className="py-24 relative overflow-hidden bg-background">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+          
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 grid lg:grid-cols-2 gap-16 items-center">
+            <div className="order-2 lg:order-1">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-[2rem] blur-2xl opacity-50 group-hover:opacity-80 transition animate-pulse"></div>
+                
+                <div className="relative bg-card border border-border rounded-[2.5rem] p-8 shadow-2xl overflow-hidden">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                         <FileUp size={20} />
+                      </div>
+                      <div className="text-sm font-bold text-foreground">Migration_Data.csv</div>
+                    </div>
+                    <div className="px-3 py-1 bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-green-500/20">Ready to Import</div>
+                  </div>
+
+                  {/* CSV Rows Decoration */}
+                  <div className="space-y-3 opacity-40">
+                    <div className="h-3 w-full bg-muted rounded-full flex gap-2 p-1">
+                      <div className="w-1/4 h-full bg-primary/30 rounded-full"></div>
+                      <div className="w-1/2 h-full bg-muted-foreground/10 rounded-full"></div>
+                      <div className="w-1/4 h-full bg-primary/20 rounded-full"></div>
+                    </div>
+                    <div className="h-3 w-full bg-muted rounded-full flex gap-2 p-1">
+                      <div className="w-1/5 h-full bg-primary/30 rounded-full"></div>
+                      <div className="w-3/5 h-full bg-muted-foreground/10 rounded-full"></div>
+                      <div className="w-1/5 h-full bg-primary/20 rounded-full"></div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex flex-col items-center gap-4 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/30">
+                      <CheckCircle2 size={28} />
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-foreground">Fast & Secure Bulk Import</div>
+                      <p className="text-xs text-muted-foreground mt-1 max-w-[240px] mx-auto leading-relaxed">Automatically maps your history to journal entries and fitness logs.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="order-1 lg:order-2 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full border border-primary/20">
+                Smooth Migration
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight leading-[1.1]">
+                Switch seamlessly. <br/>
+                <span className="text-primary italic">Keep your history.</span>
+              </h2>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Import thousands of entries from Google Sheets or Excel in seconds. Our intelligent parser preserves every memory and every expense group.
+              </p>
+              
+              <div className="space-y-6 pt-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
+                    <Download size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground">Try the Format</h4>
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">Download our standard template to see how to organize your data for a perfect import.</p>
+                    <a 
+                      href="/sample_diary.csv" 
+                      download 
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-foreground text-background text-sm font-bold hover:opacity-90 transition-all group shadow-lg"
+                    >
+                      Download Sample CSV
+                      <Download size={16} className="group-hover:translate-y-0.5 transition-transform" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-muted/50 border border-border flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-full bg-success/20 text-success flex items-center justify-center font-bold text-sm shrink-0">✓</div>
+                  <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Validates duplicates & errors</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -269,16 +357,72 @@ export default function Landing() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card py-12 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-          <div className="flex items-center gap-2 text-primary opacity-80">
-            <Activity size={24} strokeWidth={2.5} />
-            <span className="text-xl font-bold tracking-tight text-foreground">MyDiary</span>
+      <footer className="border-t border-border bg-card pt-24 pb-12 mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+            {/* Brand Column */}
+            <div className="space-y-8">
+              <div className="flex items-center gap-2 text-primary">
+                <Activity size={28} strokeWidth={2.5} />
+                <span className="text-2xl font-black tracking-tight text-foreground uppercase">MyDiary</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px]">
+                The complete daily journal and budget ledger designed for individuals who value privacy and progress above all else.
+              </p>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
+                  <Twitter size={18} />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
+                  <Github size={18} />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
+                  <Mail size={18} />
+                </a>
+              </div>
+            </div>
+
+            {/* Product Column */}
+            <div>
+              <h4 className="font-black text-foreground uppercase tracking-widest text-xs mb-8">Product</h4>
+              <ul className="space-y-4">
+                <li><a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Core Features</a></li>
+                <li><Link to="/register" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Free Tier</Link></li>
+                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Migration Tools</a></li>
+                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Security Protocol</a></li>
+              </ul>
+            </div>
+
+            {/* Resources Column */}
+            <div>
+              <h4 className="font-black text-foreground uppercase tracking-widest text-xs mb-8">Resources</h4>
+              <ul className="space-y-4">
+                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Community Forum</a></li>
+                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Help Center</a></li>
+                <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Privacy Guarantees</a></li>
+              </ul>
+            </div>
+
+            {/* Legal Column */}
+            <div>
+              <h4 className="font-black text-foreground uppercase tracking-widest text-xs mb-8">Legal</h4>
+              <ul className="space-y-4">
+                <li><Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Terms of Service</Link></li>
+              </ul>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} MyDiary. All rights reserved.</p>
-          <div className="flex gap-6">
-             <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-             <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
+
+          <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+              © {new Date().getFullYear()} MyDiary Open Source. Built for Progress.
+            </p>
+            <div className="flex gap-8">
+              <div className="flex items-center gap-2 text-[10px] font-black text-success uppercase tracking-widest">
+                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
+                All Systems Operational
+              </div>
+            </div>
           </div>
         </div>
       </footer>

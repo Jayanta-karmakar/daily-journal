@@ -10,6 +10,8 @@ import { validateEntries } from './validateEntries';
 import { useAppContext } from '@/context/AppContext';
 import { DayEntry } from '@/data/mockData';
 import { toast } from 'sonner';
+import { ConfirmModal } from '../ConfirmModal';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 
 type FilterTab = 'all' | 'ready' | 'warning' | 'error';
 
@@ -22,13 +24,15 @@ export const ImportSection = () => {
   
   const [filter, setFilter] = useState<FilterTab>('all');
   const [isImporting, setIsImporting] = useState(false);
-  const [importSuccessMessage, setImportSuccessMessage] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [importSummary, setImportSummary] = useState({ added: 0, skipped: 0 });
 
   const handleFileParsed = (entries: ParsedEntry[], filename: string, size: number, skipped: number) => {
     setParsedEntries(entries);
     setFileDetails({ name: filename, size });
     setSkippedCount(skipped);
-    setImportSuccessMessage(null);
+    setImportSummary({ added: 0, skipped: 0 });
+    setShowSuccessModal(false);
   };
 
   const resetState = () => {
@@ -59,7 +63,10 @@ export const ImportSection = () => {
   };
 
   const handleSelectAll = (select: boolean) => {
-    setParsedEntries(parsedEntries.map(e => ({ ...e, selected: select })));
+    const visibleIds = new Set(filteredEntries.map(e => e.id));
+    setParsedEntries(parsedEntries.map(e => 
+      visibleIds.has(e.id) ? { ...e, selected: select } : e
+    ));
   };
 
   const filteredEntries = useMemo(() => {
@@ -113,15 +120,42 @@ export const ImportSection = () => {
     }
 
     setIsImporting(false);
-    setImportSuccessMessage(`✅ Import complete. ${added} entries added. ${skipped} skipped (duplicates).`);
+    setImportSummary({ added, skipped });
+    setShowSuccessModal(true);
     resetState();
     
-    // Smoothly scroll back to top of section or show toast
-    toast.success('Import completed successfully!');
+    toast.success('Process completed!');
   };
 
   return (
-    <section className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden mt-8 md:mt-12">
+    <section className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden mt-8 md:mt-12 relative">
+      {/* SOFT LOADER OVERLAY */}
+      {isImporting && (
+        <div className="fixed inset-0 z-[1000] bg-background/60 backdrop-blur-[2px] flex flex-col items-center justify-center animate-in fade-in duration-300">
+          <div className="bg-card border border-border p-10 rounded-[40px] shadow-2xl flex flex-col items-center gap-6 max-w-xs w-full">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse"></div>
+              <Loader2 className="w-12 h-12 text-primary animate-spin relative" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-black text-foreground mb-2">Importing Data</h3>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest animate-pulse">Please wait, don't close...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUCCESS MODAL */}
+      <ConfirmModal 
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        onConfirm={() => setShowSuccessModal(false)}
+        title="Import Successful"
+        message={`We've successfully processed your file. ${importSummary.added} entries were added to your diary, and ${importSummary.skipped} duplicates were safely skipped.`}
+        confirmText="Awesome, take me back"
+        variant="info"
+      />
+
       <div className="p-5 sm:p-6 border-b border-border bg-muted/10 flex items-center justify-between">
         <div className="flex items-center gap-4">
            <div className="p-2.5 bg-primary/10 text-primary rounded-xl hidden sm:block">
@@ -134,13 +168,6 @@ export const ImportSection = () => {
         </div>
       </div>
       <div className="p-6 md:p-8">
-
-        {importSuccessMessage && (
-          <div className="bg-success/20 text-success-foreground px-4 py-3 rounded-xl mb-6 font-medium text-sm border border-success/30 flex justify-between items-center">
-            {importSuccessMessage}
-            <button onClick={() => setImportSuccessMessage(null)} className="text-muted-foreground hover:text-foreground">✕</button>
-          </div>
-        )}
 
         {/* STEP 1: UPLOAD */}
         {!fileDetails && (
@@ -191,10 +218,14 @@ export const ImportSection = () => {
                 ))}
               </div>
 
-              <div className="flex items-center gap-3 text-sm">
-                <button className="text-primary hover:underline font-medium" onClick={() => handleSelectAll(true)}>Select All</button>
-                <span className="text-muted-foreground">|</span>
-                <button className="text-primary hover:underline font-medium" onClick={() => handleSelectAll(false)}>Deselect All</button>
+              <div className="flex items-center gap-3 bg-muted/30 px-3 py-2 rounded-xl border border-border/50">
+                <input 
+                  type="checkbox"
+                  className="w-4 h-4 accent-primary cursor-pointer"
+                  checked={filteredEntries.length > 0 && filteredEntries.every(e => e.selected)}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest select-none">Select All Visible</span>
               </div>
             </div>
 

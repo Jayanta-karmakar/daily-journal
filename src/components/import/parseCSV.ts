@@ -1,13 +1,13 @@
 import { Expense } from '@/data/mockData';
-import { ParsedEntry } from './types';
-import { validateEntries } from './validateEntries';
+import { ParsedEntry } from '@/components/import/types';
+import { validateEntries } from '@/components/import/validateEntries';
 
 function parseCSVQuotes(text: string): string[][] {
   const result: string[][] = [];
   let currentGroup: string[] = [];
   let currentFieldValue = "";
   let inQuotes = false;
-  
+
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
     const nextChar = text[i + 1];
@@ -36,7 +36,7 @@ function parseCSVQuotes(text: string): string[][] {
       currentFieldValue += char;
     }
   }
-  
+
   if (currentFieldValue || currentGroup.length > 0) {
     if (currentFieldValue.endsWith('\r') && !inQuotes) {
       currentFieldValue = currentFieldValue.slice(0, -1);
@@ -50,8 +50,8 @@ function parseCSVQuotes(text: string): string[][] {
 }
 
 const monthMap: Record<string, string> = {
-  jan: '01', feb: '02', mar: '03', apr: '04', 
-  may: '05', jun: '06', jul: '07', aug: '08', 
+  jan: '01', feb: '02', mar: '03', apr: '04',
+  may: '05', jun: '06', jul: '07', aug: '08',
   sep: '09', oct: '10', nov: '11', dec: '12'
 };
 
@@ -62,7 +62,7 @@ export function parseCSV(rawCSV: string): ParsedEntry[] {
   for (let i = 1; i < rows.length; i++) { // Skip header
     const row = rows[i];
     if (row.length < 5) continue;
-    
+
     let [dateCol, dayCol, journalCol, totalSpendCol, descCol, gymCol, noteCol] = [
       row[0]?.trim() || '',
       row[1]?.trim() || '',
@@ -78,7 +78,7 @@ export function parseCSV(rawCSV: string): ParsedEntry[] {
 
     const cleanDesc = descCol.replace(/[\n\r]/g, '');
     const chunkStrings = cleanDesc.split('+').filter(c => c.trim().length > 0);
-    
+
     let errFlags: string[] = [];
     const expenses: Expense[] = [];
 
@@ -119,7 +119,7 @@ export function parseCSV(rawCSV: string): ParsedEntry[] {
     }
 
     const newEntry: ParsedEntry = {
-      id: parsedDate,
+      id: crypto.randomUUID(),
       date: parsedDate,
       day: dayCol,
       journalText: journalCol,
@@ -131,7 +131,7 @@ export function parseCSV(rawCSV: string): ParsedEntry[] {
       status: 'ready',
       warnings: warningFlags,
       errors: errFlags,
-      selected: false
+      selected: true
     };
 
     parsedEntries.push(newEntry);

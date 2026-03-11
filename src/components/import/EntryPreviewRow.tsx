@@ -24,22 +24,26 @@ export const EntryPreviewRow: React.FC<EntryPreviewRowProps> = ({ entry, onChang
   return (
     <div className={`border rounded-xl mb-4 overflow-hidden transition-all shadow-sm ${entry.selected ? 'border-primary/40 bg-card shadow-md' : 'border-border bg-muted/10 opacity-75'}`}>
       {/* Collapsed Header */}
-      <div 
-        className="flex items-center p-4 sm:px-6 cursor-pointer hover:bg-muted/30 transition-colors"
-      >
-        <div className="flex items-center gap-4 flex-1" onClick={() => setExpanded(!expanded)}>
-          <input 
-            type="checkbox" 
-            className="w-5 h-5 accent-primary cursor-pointer shrink-0"
-            checked={entry.selected}
-            onChange={(e) => {
-              onChange({ ...entry, selected: e.target.checked });
+        <div className="flex items-center p-4 sm:px-6 cursor-pointer hover:bg-muted/30 transition-colors group">
+          <div 
+            className="flex items-center h-10 pr-4 border-r border-border/50" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange({ ...entry, selected: !entry.selected });
             }}
-            onClick={(e) => e.stopPropagation()} 
-          />
+          >
+            <input 
+              type="checkbox" 
+              className="w-5 h-5 accent-primary shrink-0 transition-transform active:scale-90 pointer-events-none"
+              checked={entry.selected}
+              readOnly 
+            />
+          </div>
           
-          <div className="flex-1 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm md:text-base">
-            <div className="font-bold text-foreground min-w-[90px]">{entry.date.slice(5).replace('-', ' ')}</div>
+          <div className="flex-1 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm md:text-base pl-4" onClick={() => setExpanded(!expanded)}>
+            <div className="font-black text-foreground min-w-[90px] tracking-tight">
+              {new Date(entry.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+            </div>
             <div className="text-muted-foreground w-12 hidden md:block font-medium uppercase tracking-tighter text-xs">{entry.day}</div>
             
             <div className="flex items-center gap-2 min-w-[60px] bg-muted/30 px-2 py-1 rounded-lg border border-border/50">
@@ -68,7 +72,6 @@ export const EntryPreviewRow: React.FC<EntryPreviewRowProps> = ({ entry, onChang
             </div>
           </div>
         </div>
-      </div>
 
       {/* Expanded Content */}
       {expanded && (

@@ -15,16 +15,16 @@ const GymToggle = ({ value, onChange, isSunday }: GymToggleProps) => {
     <div className="flex gap-2">
       {options.map((opt) => {
         const isSelected = value === opt.val;
-        const disabled = isSunday ? opt.val !== 'closed' : opt.val === 'closed';
-        let cls = 'flex-1 py-3 rounded-full text-sm font-semibold transition-all text-center cursor-pointer select-none ';
+        const disabled = isSunday && opt.val !== 'closed';
+        let cls = 'flex-1 py-3 rounded-full text-[10px] font-black tracking-widest transition-all text-center cursor-pointer select-none border ';
         if (disabled) {
-          cls += 'opacity-40 cursor-not-allowed bg-muted text-muted-foreground';
+          cls += 'opacity-40 cursor-not-allowed bg-muted text-muted-foreground border-transparent';
         } else if (isSelected && opt.val === 'yes') {
-          cls += 'bg-success text-success-foreground shadow-md';
+          cls += 'bg-success text-success-foreground border-transparent shadow-md';
         } else if (isSelected && opt.val === 'no') {
-          cls += 'bg-destructive text-destructive-foreground shadow-md';
+          cls += 'bg-destructive text-destructive-foreground border-transparent shadow-md';
         } else if (isSelected && opt.val === 'closed') {
-          cls += 'bg-muted text-muted-foreground';
+          cls += 'bg-muted-foreground text-card border-transparent shadow-sm';
         } else {
           cls += 'bg-card border border-border text-foreground hover:bg-muted';
         }

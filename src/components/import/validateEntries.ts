@@ -55,7 +55,7 @@ export function validateEntries(entries: ParsedEntry[]): ParsedEntry[] {
       status,
       warnings,
       errors,
-      selected: status !== 'error'
+      selected: status === 'error' ? false : entry.selected,
     };
   });
 }

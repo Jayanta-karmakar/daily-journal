@@ -1,7 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, PenSquare } from 'lucide-react';
+import { ArrowLeft, PenSquare, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/data/calculations';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { useState } from 'react';
 
 const typeColors: Record<string, string> = {
   need: 'bg-primary/5',
@@ -20,8 +22,14 @@ const typeBadge: Record<string, string> = {
 const ViewEntry = () => {
   const { date } = useParams<{ date: string }>();
   const navigate = useNavigate();
-  const { getEntryByDate } = useAppContext();
+  const { getEntryByDate, deleteEntry } = useAppContext();
   const entry = getEntryByDate(date || '');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleDelete = async () => {
+    await deleteEntry(entry?.date || '');
+    navigate('/');
+  };
 
   if (!entry) {
     return (
@@ -50,10 +58,25 @@ const ViewEntry = () => {
         <button onClick={() => navigate('/')} className="px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
           <ArrowLeft size={16} className="inline mr-1" /> Back
         </button>
-        <button onClick={() => navigate(`/entry/${entry.date}/edit`)} className="px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
-          <PenSquare size={16} className="inline mr-1" /> Edit
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => navigate(`/entry/${entry.date}/edit`)} className="px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors flex items-center gap-2">
+            <PenSquare size={16} /> Edit
+          </button>
+          <button onClick={() => setShowDeleteModal(true)} className="px-3 py-2 rounded-lg border border-destructive/20 bg-destructive/5 text-destructive text-sm font-medium hover:bg-destructive/10 transition-colors flex items-center gap-2">
+            <Trash2 size={16} /> Delete
+          </button>
+        </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete this entry?"
+        message={`Are you sure you want to remove the entry for ${formatted}? This cannot be undone.`}
+        confirmText="Delete Entry"
+        variant="danger"
+      />
 
       <h1 className="text-3xl font-bold text-foreground mb-1">{formatted}</h1>
       <p className="text-muted-foreground mb-4">{long}</p>

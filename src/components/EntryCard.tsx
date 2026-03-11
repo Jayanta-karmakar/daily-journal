@@ -1,7 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import type { DayEntry } from '@/data/mockData';
 import { formatCurrency } from '@/data/calculations';
 import { useAppContext } from '@/context/AppContext';
+import { Trash2 } from 'lucide-react';
+import { ConfirmModal } from './ConfirmModal';
 
 interface EntryCardProps {
   entry: DayEntry;
@@ -9,8 +12,9 @@ interface EntryCardProps {
 
 const EntryCard = ({ entry }: EntryCardProps) => {
   const navigate = useNavigate();
-  const { config } = useAppContext();
+  const { config, deleteEntry } = useAppContext();
   const isOverLimit = entry.totalSpend > config.dailySpendLimit;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const gymBadge = () => {
     if (entry.gymAttended === 'yes')
@@ -39,6 +43,16 @@ const EntryCard = ({ entry }: EntryCardProps) => {
         <div className="flex items-center gap-2">
           {gymBadge()}
           {isOverLimit && <span className="text-xs text-destructive font-medium">⚠️ Over limit</span>}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDeleteModal(true);
+            }}
+            className="p-1 px-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            title="Delete entry"
+          >
+            <Trash2 size={16} />
+          </button>
         </div>
       </div>
       <p className="text-sm text-muted-foreground truncate mb-2">{entry.journalText}</p>
@@ -53,6 +67,16 @@ const EntryCard = ({ entry }: EntryCardProps) => {
       {entry.notes && (
         <p className="text-xs text-muted-foreground mt-1">📝 {entry.notes}</p>
       )}
+
+      <ConfirmModal 
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => deleteEntry(entry.date)}
+        title="Delete entry?"
+        message={`Are you sure you want to remove the record for ${entry.date}?`}
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 };

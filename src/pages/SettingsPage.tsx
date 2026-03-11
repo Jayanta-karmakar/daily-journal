@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, LogOut, Wallet, Palette, Save } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, LogOut, Wallet, Palette, Save, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/data/calculations';
 import { toast } from 'sonner';
 import { useTheme } from '@/components/theme-provider';
 import { ImportSection } from '@/components/import/ImportSection';
+import { ConfirmModal } from '@/components/ConfirmModal';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
-  const { config, setConfig, logout } = useAppContext();
+  const { config, setConfig, logout, deleteAllEntries } = useAppContext();
   const { theme, setTheme } = useTheme();
   
   const [salary, setSalary] = useState(config.salary.toString());
   const [limit, setLimit] = useState(config.dailySpendLimit.toString());
   const [budget, setBudget] = useState(config.monthlyBudget.toString());
+  const [showClearAllModal, setShowClearAllModal] = useState(false);
 
   const handleSave = async () => {
     await setConfig({
@@ -154,6 +156,45 @@ const SettingsPage = () => {
 
         {/* DATA & INTEGRATIONS - Import Section */}
         <ImportSection />
+
+        {/* DANGER ZONE */}
+        <section className="bg-destructive/5 rounded-2xl border border-destructive/20 shadow-sm overflow-hidden mt-12">
+          <div className="p-5 sm:p-6 border-b border-destructive/10 bg-destructive/5 flex items-center gap-4">
+            <div className="p-2.5 bg-destructive/10 text-destructive rounded-xl hidden sm:block">
+              <Trash2 size={20} />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-destructive">Danger Zone</h2>
+              <p className="text-xs sm:text-sm text-destructive/70 mt-0.5">Irreversible actions for your data</p>
+            </div>
+          </div>
+          
+          <div className="p-6 md:p-8">
+             <div className="flex flex-col sm:flex-row items-baseline sm:items-center justify-between w-full gap-4">
+               <div>
+                 <span className="text-sm font-bold text-foreground block">Clear All Diary Data</span>
+                 <span className="text-xs text-muted-foreground">This will permanently delete all your journal entries and expense records.</span>
+               </div>
+               <button
+                 onClick={() => setShowClearAllModal(true)}
+                 className="px-6 py-3 w-full sm:w-auto rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest shadow-lg text-xs"
+               >
+                 <Trash2 size={16} />
+                 Clear All Data
+               </button>
+             </div>
+          </div>
+        </section>
+
+        <ConfirmModal 
+          isOpen={showClearAllModal}
+          onClose={() => setShowClearAllModal(false)}
+          onConfirm={deleteAllEntries}
+          title="Clear all records?"
+          message="This action is permanent and will completely erase your entire history, including journal entries and expenses. You cannot undo this."
+          confirmText="Clear Everything"
+          variant="danger"
+        />
 
       </div>
     </div>

@@ -6,6 +6,7 @@ import { AppProvider, useAppContext } from "@/context/AppContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import TopNav from "@/components/TopNav";
 import BottomNav from "@/components/BottomNav";
+import ScrollToTop from "@/components/ScrollToTop";
 import Dashboard from "./pages/Dashboard";
 import NewEntry from "./pages/NewEntry";
 import ViewEntry from "./pages/ViewEntry";
@@ -13,10 +14,12 @@ import EditEntry from "./pages/EditEntry";
 import SettingsPage from "./pages/SettingsPage";
 import MonthlySummary from "./pages/MonthlySummary";
 import NotFound from "./pages/NotFound";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 const queryClient = new QueryClient();
 
@@ -29,20 +32,27 @@ const AppContent = () => {
   
   if (!session) {
     return (
-      <BrowserRouter>
+      <>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-      </BrowserRouter>
+      </>
     );
   }
 
+  const location = useLocation();
+  const isLegalPage = ["/privacy", "/terms"].includes(location.pathname);
+
   return (
-    <BrowserRouter>
-      <TopNav />
+    <>
+      <ScrollToTop />
+      {!isLegalPage && <TopNav />}
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/new" element={<NewEntry />} />
@@ -52,10 +62,12 @@ const AppContent = () => {
         <Route path="/month-summary" element={<MonthlySummary />} />
         <Route path="/login" element={<Navigate to="/" />} />
         <Route path="/register" element={<Navigate to="/" />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <BottomNav />
-    </BrowserRouter>
+      {!isLegalPage && <BottomNav />}
+    </>
   );
 };
 
@@ -65,7 +77,9 @@ const App = () => (
       <TooltipProvider>
         <Sonner />
         <AppProvider>
-          <AppContent />
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
         </AppProvider>
       </TooltipProvider>
     </ThemeProvider>

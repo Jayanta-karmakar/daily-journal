@@ -13,6 +13,8 @@ interface AppContextType {
   session: any;
   loading: boolean;
   logout: () => void;
+  deleteEntry: (date: string) => Promise<void>;
+  deleteAllEntries: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -202,6 +204,28 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     fetchEntries();
   };
+  
+  const deleteEntry = async (date: string) => {
+    if (!session?.user?.id) return;
+    const { error } = await supabase.from('entries').delete().eq('date', date).eq('user_id', session.user.id);
+    if (error) {
+      toast.error('Failed to delete entry');
+    } else {
+      toast.success('Entry deleted');
+      fetchEntries();
+    }
+  };
+
+  const deleteAllEntries = async () => {
+    if (!session?.user?.id) return;
+    const { error } = await supabase.from('entries').delete().eq('user_id', session.user.id);
+    if (error) {
+      toast.error('Failed to clear data');
+    } else {
+      toast.success('All data cleared');
+      fetchEntries();
+    }
+  };
 
   const getEntryByDate = (date: string) => entries.find((e) => e.date === date);
 
@@ -210,7 +234,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AppContext.Provider value={{ entries, config, setConfig, addEntry, updateEntry, getEntryByDate, session, loading, logout }}>
+    <AppContext.Provider value={{ entries, config, setConfig, addEntry, updateEntry, getEntryByDate, session, loading, logout, deleteEntry, deleteAllEntries }}>
       {children}
     </AppContext.Provider>
   );
