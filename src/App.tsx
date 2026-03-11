@@ -20,6 +20,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const AppContent = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </>
@@ -47,7 +51,7 @@ const AppContent = () => {
   }
 
   const location = useLocation();
-  const isLegalPage = ["/privacy", "/terms"].includes(location.pathname);
+  const isLegalPage = ["/privacy", "/terms", "/forgot-password", "/reset-password"].includes(location.pathname);
 
   return (
     <>
@@ -64,6 +68,8 @@ const AppContent = () => {
         <Route path="/register" element={<Navigate to="/" />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!isLegalPage && <BottomNav />}
