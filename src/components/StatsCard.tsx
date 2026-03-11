@@ -14,7 +14,7 @@ const variantClasses: Record<string, string> = {
 };
 
 const StatsCard = ({ label, value, variant = 'default' }: StatsCardProps) => (
-  <div className="bg-card rounded-xl border border-border p-4 shadow-sm min-w-[140px] flex-1">
+  <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
     <p className={`text-xl font-bold mt-1 ${variantClasses[variant]}`}>{formatCurrency(value)}</p>
   </div>
