@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppProvider } from "@/context/AppContext";
+import { AppProvider, useAppContext } from "@/context/AppContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import TopNav from "@/components/TopNav";
 import BottomNav from "@/components/BottomNav";
@@ -13,8 +13,37 @@ import EditEntry from "./pages/EditEntry";
 import SettingsPage from "./pages/SettingsPage";
 import MonthlySummary from "./pages/MonthlySummary";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
+
+const AppContent = () => {
+  const { session, loading } = useAppContext();
+  
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-foreground bg-background">Loading...</div>;
+  }
+  
+  if (!session) {
+    return <Login />;
+  }
+
+  return (
+    <BrowserRouter>
+      <TopNav />
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/new" element={<NewEntry />} />
+        <Route path="/entry/:date" element={<ViewEntry />} />
+        <Route path="/entry/:date/edit" element={<EditEntry />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/month-summary" element={<MonthlySummary />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <BottomNav />
+    </BrowserRouter>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -22,19 +51,7 @@ const App = () => (
       <TooltipProvider>
         <Sonner />
         <AppProvider>
-          <BrowserRouter>
-            <TopNav />
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/new" element={<NewEntry />} />
-              <Route path="/entry/:date" element={<ViewEntry />} />
-              <Route path="/entry/:date/edit" element={<EditEntry />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/month-summary" element={<MonthlySummary />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <BottomNav />
-          </BrowserRouter>
+          <AppContent />
         </AppProvider>
       </TooltipProvider>
     </ThemeProvider>
@@ -42,3 +59,4 @@ const App = () => (
 );
 
 export default App;
+

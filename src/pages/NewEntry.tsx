@@ -29,13 +29,11 @@ const NewEntry = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const dayName = getDayOfWeek(date);
-  const isSunday = dayName === 'Sunday';
 
   const handleDateChange = (val: string) => {
     setDate(val);
     const d = getDayOfWeek(val);
-    if (d === 'Sunday') setGym('closed');
-    else if (gym === 'closed') setGym('no');
+    if (d === 'Sunday' && gym !== 'yes') setGym('closed');
   };
 
   const updateExpense = (i: number, field: string, value: string) => {
@@ -66,7 +64,7 @@ const NewEntry = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return;
     const validExpenses: Expense[] = expenses
       .filter((r) => r.label.trim() || parseFloat(r.amount) > 0)
@@ -82,13 +80,13 @@ const NewEntry = () => {
       date,
       day: dayName,
       journalText: journal,
-      gymAttended: isSunday ? 'closed' : gym,
+      gymAttended: gym,
       expenses: validExpenses,
       notes,
       totalSpend: validExpenses.filter((e) => e.type === 'need' || e.type === 'want').reduce((s, e) => s + e.amount, 0),
       totalInvested: validExpenses.filter((e) => e.type === 'investment' || e.type === 'savings').reduce((s, e) => s + e.amount, 0),
     };
-    addEntry(entry);
+    await addEntry(entry);
     toast.success('Entry saved!');
     navigate('/');
   };
@@ -102,97 +100,105 @@ const NewEntry = () => {
         <h1 className="text-xl font-bold text-foreground">New Entry</h1>
       </div>
 
-      {/* Date */}
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">📅 Date</h2>
-        <p className="text-sm text-destructive mb-1">Date *</p>
-        <div className="flex gap-3 items-center">
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => handleDateChange(e.target.value)}
-            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-          />
-          <span className="px-4 py-2.5 rounded-lg border border-border text-sm font-medium bg-muted">{dayName}</span>
-        </div>
-        {errors.date && <p className="text-destructive text-xs mt-1">{errors.date}</p>}
-      </section>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Left Column */}
+        <div className="flex flex-col gap-4">
+          {/* Date */}
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">📅 Date</h2>
+            <p className="text-sm text-destructive mb-1">Date *</p>
+            <div className="flex gap-3 items-center">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => handleDateChange(e.target.value)}
+                className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <span className="px-4 py-2.5 rounded-lg border border-border text-sm font-medium bg-muted">{dayName}</span>
+            </div>
+            {errors.date && <p className="text-destructive text-xs mt-1">{errors.date}</p>}
+          </section>
 
-      {/* Journal */}
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">✏️ Journal</h2>
-        <p className="text-sm text-destructive mb-1">What did you do today? *</p>
-        <textarea
-          value={journal}
-          onChange={(e) => setJournal(e.target.value)}
-          rows={4}
-          placeholder="Write about your day..."
-          className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
-        />
-        {errors.journal && <p className="text-destructive text-xs mt-1">{errors.journal}</p>}
-      </section>
+          {/* Gym */}
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">💪 Gym Attendance</h2>
+            <GymToggle value={gym} onChange={setGym} isSunday={false} />
+          </section>
 
-      {/* Gym */}
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">💪 Gym Attendance</h2>
-        <GymToggle value={isSunday ? 'closed' : gym} onChange={setGym} isSunday={isSunday} />
-      </section>
-
-      {/* Expenses */}
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">🎯 Today's Expenses</h2>
-        <div className="flex flex-col gap-2 mb-3">
-          {expenses.map((row, i) => (
-            <ExpenseRow
-              key={i}
-              expense={row}
-              onChange={(field, val) => updateExpense(i, field, val)}
-              onDelete={() => deleteExpense(i)}
-              error={errors[`exp-${i}`]}
+          {/* Journal */}
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">✏️ Journal</h2>
+            <p className="text-sm text-destructive mb-1">What did you do today? *</p>
+            <textarea
+              value={journal}
+              onChange={(e) => setJournal(e.target.value)}
+              rows={4}
+              placeholder="Write about your day..."
+              className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
             />
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={() => setExpenses((p) => [...p, emptyRow()])}
-          className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
-        >
-          + Add Row
-        </button>
+            {errors.journal && <p className="text-destructive text-xs mt-1">{errors.journal}</p>}
+          </section>
 
-        <div className="mt-4 bg-muted rounded-lg p-3">
-          <div className="flex justify-between text-sm font-semibold">
-            <span>Actual Spend (Need + Want)</span>
-            <span>{formatCurrency(actualSpend)}</span>
-          </div>
-          <div className="flex justify-between text-sm font-medium text-investment mt-1">
-            <span>Invested (Investment + Savings)</span>
-            <span>{formatCurrency(invested)}</span>
-          </div>
+          {/* Notes */}
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">📝 Notes</h2>
+            <p className="text-sm text-muted-foreground mb-1">Optional note for the day</p>
+            <input
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Any extra note..."
+              className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </section>
         </div>
 
-        {actualSpend > config.dailySpendLimit && (
-          <div className="mt-3 bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
-            <p className="text-sm text-destructive font-medium">⚠️ You've exceeded your daily limit of {formatCurrency(config.dailySpendLimit)}</p>
-          </div>
-        )}
-      </section>
+        {/* Right Column */}
+        <div className="flex flex-col gap-4">
+          {/* Expenses */}
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm h-full">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">🎯 Today's Expenses</h2>
+            <div className="flex flex-col gap-2 mb-3">
+              {expenses.map((row, i) => (
+                <ExpenseRow
+                  key={i}
+                  expense={row}
+                  onChange={(field, val) => updateExpense(i, field, val)}
+                  onDelete={() => deleteExpense(i)}
+                  error={errors[`exp-${i}`]}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setExpenses((p) => [...p, emptyRow()])}
+              className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              + Add Row
+            </button>
 
-      {/* Notes */}
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-6">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">📝 Notes</h2>
-        <p className="text-sm text-muted-foreground mb-1">Optional note for the day</p>
-        <input
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Any extra note..."
-          className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-        />
-      </section>
+            <div className="mt-4 bg-muted rounded-lg p-3">
+              <div className="flex justify-between text-sm font-semibold">
+                <span>Actual Spend (Need + Want)</span>
+                <span>{formatCurrency(actualSpend)}</span>
+              </div>
+              <div className="flex justify-between text-sm font-medium text-investment mt-1">
+                <span>Invested (Investment + Savings)</span>
+                <span>{formatCurrency(invested)}</span>
+              </div>
+            </div>
+
+            {actualSpend > config.dailySpendLimit && (
+              <div className="mt-3 bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
+                <p className="text-sm text-destructive font-medium">⚠️ You've exceeded your daily limit of {formatCurrency(config.dailySpendLimit)}</p>
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
 
       <button
         onClick={handleSave}
-        className="w-full py-4 rounded-lg bg-primary text-primary-foreground font-semibold text-base hover:bg-primary/90 transition-colors shadow-md"
+        className="w-full mt-6 flex justify-center py-4 rounded-lg bg-primary text-primary-foreground font-semibold text-base hover:bg-primary/90 transition-colors shadow-md"
       >
         💾 Save Entry
       </button>

@@ -47,7 +47,6 @@ const EditEntry = () => {
   }
 
   const dayName = getDayOfWeek(date);
-  const isSunday = dayName === 'Sunday';
 
   const updateExpenseRow = (i: number, field: string, value: string) => {
     setExpenses((prev) => prev.map((row, idx) => (idx === i ? { ...row, [field]: value } : row)));
@@ -71,7 +70,7 @@ const EditEntry = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return;
     const validExpenses: Expense[] = expenses
       .filter((r) => r.label.trim() || parseFloat(r.amount) > 0)
@@ -85,13 +84,13 @@ const EditEntry = () => {
     const updated: DayEntry = {
       ...entry,
       journalText: journal,
-      gymAttended: isSunday ? 'closed' : gym,
+      gymAttended: gym,
       expenses: validExpenses,
       notes,
       totalSpend: validExpenses.filter((e) => e.type === 'need' || e.type === 'want').reduce((s, e) => s + e.amount, 0),
       totalInvested: validExpenses.filter((e) => e.type === 'investment' || e.type === 'savings').reduce((s, e) => s + e.amount, 0),
     };
-    updateEntry(updated);
+    await updateEntry(updated);
     toast.success('Entry updated!');
     navigate(`/entry/${date}`);
   };
@@ -105,55 +104,63 @@ const EditEntry = () => {
         <h1 className="text-xl font-bold text-foreground">Edit Entry</h1>
       </div>
 
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">📅 Date</h2>
-        <div className="flex gap-3 items-center">
-          <input type="date" value={date} disabled className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-muted text-sm opacity-60" />
-          <span className="px-4 py-2.5 rounded-lg border border-border text-sm font-medium bg-muted">{dayName}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Left Column */}
+        <div className="flex flex-col gap-4">
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">📅 Date</h2>
+            <div className="flex gap-3 items-center">
+              <input type="date" value={date} disabled className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-muted text-sm opacity-60" />
+              <span className="px-4 py-2.5 rounded-lg border border-border text-sm font-medium bg-muted">{dayName}</span>
+            </div>
+          </section>
+
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">✏️ Journal</h2>
+            <textarea value={journal} onChange={(e) => setJournal(e.target.value)} rows={4}
+              className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y" />
+            {errors.journal && <p className="text-destructive text-xs mt-1">{errors.journal}</p>}
+          </section>
+
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">💪 Gym Attendance</h2>
+            <GymToggle value={gym} onChange={setGym} isSunday={false} />
+          </section>
+
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">📝 Notes</h2>
+            <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any extra note..."
+              className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          </section>
         </div>
-      </section>
 
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">✏️ Journal</h2>
-        <textarea value={journal} onChange={(e) => setJournal(e.target.value)} rows={4}
-          className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y" />
-        {errors.journal && <p className="text-destructive text-xs mt-1">{errors.journal}</p>}
-      </section>
-
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">💪 Gym Attendance</h2>
-        <GymToggle value={isSunday ? 'closed' : gym} onChange={setGym} isSunday={isSunday} />
-      </section>
-
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">🎯 Expenses</h2>
-        <div className="flex flex-col gap-2 mb-3">
-          {expenses.map((row, i) => (
-            <ExpenseRow key={i} expense={row} onChange={(f, v) => updateExpenseRow(i, f, v)}
-              onDelete={() => setExpenses((p) => p.filter((_, idx) => idx !== i))} error={errors[`exp-${i}`]} />
-          ))}
+        {/* Right Column */}
+        <div className="flex flex-col gap-4">
+          <section className="bg-card rounded-xl border border-border p-4 shadow-sm h-full">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">🎯 Expenses</h2>
+            <div className="flex flex-col gap-2 mb-3">
+              {expenses.map((row, i) => (
+                <ExpenseRow key={i} expense={row} onChange={(f, v) => updateExpenseRow(i, f, v)}
+                  onDelete={() => setExpenses((p) => p.filter((_, idx) => idx !== i))} error={errors[`exp-${i}`]} />
+              ))}
+            </div>
+            <button type="button" onClick={() => setExpenses((p) => [...p, { amount: '', label: '', type: 'need' }])}
+              className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors">+ Add Row</button>
+            <div className="mt-4 bg-muted rounded-lg p-3">
+              <div className="flex justify-between text-sm font-semibold"><span>Actual Spend</span><span>{formatCurrency(actualSpend)}</span></div>
+              <div className="flex justify-between text-sm font-medium text-investment mt-1"><span>Invested</span><span>{formatCurrency(invested)}</span></div>
+            </div>
+            {actualSpend > config.dailySpendLimit && (
+              <div className="mt-3 bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
+                <p className="text-sm text-destructive font-medium">⚠️ Exceeded daily limit of {formatCurrency(config.dailySpendLimit)}</p>
+              </div>
+            )}
+          </section>
         </div>
-        <button type="button" onClick={() => setExpenses((p) => [...p, { amount: '', label: '', type: 'need' }])}
-          className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors">+ Add Row</button>
-        <div className="mt-4 bg-muted rounded-lg p-3">
-          <div className="flex justify-between text-sm font-semibold"><span>Actual Spend</span><span>{formatCurrency(actualSpend)}</span></div>
-          <div className="flex justify-between text-sm font-medium text-investment mt-1"><span>Invested</span><span>{formatCurrency(invested)}</span></div>
-        </div>
-        {actualSpend > config.dailySpendLimit && (
-          <div className="mt-3 bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
-            <p className="text-sm text-destructive font-medium">⚠️ Exceeded daily limit of {formatCurrency(config.dailySpendLimit)}</p>
-          </div>
-        )}
-      </section>
-
-      <section className="bg-card rounded-xl border border-border p-4 shadow-sm mb-6">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">📝 Notes</h2>
-        <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any extra note..."
-          className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-      </section>
+      </div>
 
       <button onClick={handleSave}
-        className="w-full py-4 rounded-lg bg-primary text-primary-foreground font-semibold text-base hover:bg-primary/90 transition-colors shadow-md">
+        className="w-full mt-6 py-4 rounded-lg bg-primary text-primary-foreground font-semibold text-base hover:bg-primary/90 transition-colors shadow-md">
         💾 Update Entry
       </button>
     </div>
