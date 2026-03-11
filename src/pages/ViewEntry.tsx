@@ -25,7 +25,7 @@ const ViewEntry = () => {
 
   if (!entry) {
     return (
-      <div className="max-w-[900px] mx-auto px-4 py-6 text-center">
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 text-center">
         <p className="text-muted-foreground">Entry not found.</p>
         <button onClick={() => navigate('/')} className="mt-4 text-primary font-medium">Go to Dashboard</button>
       </div>
