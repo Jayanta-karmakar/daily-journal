@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
+import { ThemeProvider } from "@/components/theme-provider";
 import TopNav from "@/components/TopNav";
 import BottomNav from "@/components/BottomNav";
 import Dashboard from "./pages/Dashboard";
@@ -17,11 +18,12 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <AppProvider>
-        <BrowserRouter>
-          <TopNav />
+    <ThemeProvider defaultTheme="dark" storageKey="daily-journal-theme">
+      <TooltipProvider>
+        <Sonner />
+        <AppProvider>
+          <BrowserRouter>
+            <TopNav />
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/new" element={<NewEntry />} />
@@ -35,6 +37,7 @@ const App = () => (
         </BrowserRouter>
       </AppProvider>
     </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

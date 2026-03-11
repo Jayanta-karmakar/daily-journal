@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, Settings as SettingsIcon } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import {
   getMonthTotalSpend, getMonthTotalInvested, getRemaining, getWorkingDays,
@@ -27,14 +27,8 @@ const Dashboard = () => {
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">📒</span>
-          <h1 className="text-xl font-bold text-primary">MyDiary</h1>
-        </div>
-        <p className="text-lg font-semibold text-foreground">March 2026</p>
-        <button onClick={() => navigate('/settings')} className="p-2 rounded-lg hover:bg-muted transition-colors">
-          <SettingsIcon size={20} className="text-muted-foreground" />
-        </button>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-lg font-semibold text-muted-foreground">March 2026</p>
       </div>
 
       {/* Stats */}

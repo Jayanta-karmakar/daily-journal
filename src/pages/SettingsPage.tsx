@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Moon, Sun } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/data/calculations';
 import { toast } from 'sonner';
+import { useTheme } from '@/components/theme-provider';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { config, setConfig } = useAppContext();
+  const { theme, setTheme } = useTheme();
+  
   const [salary, setSalary] = useState(config.salary.toString());
   const [limit, setLimit] = useState(config.dailySpendLimit.toString());
   const [budget, setBudget] = useState(config.monthlyBudget.toString());
@@ -62,6 +65,33 @@ const SettingsPage = () => {
           <div className="flex justify-between"><span className="text-muted-foreground">Salary</span><span className="font-semibold">{formatCurrency(parseInt(salary) || 0)}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Daily Limit</span><span className="font-semibold">{formatCurrency(parseInt(limit) || 0)}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Monthly Budget</span><span className="font-semibold">{formatCurrency(parseInt(budget) || 0)}</span></div>
+        </div>
+      </section>
+
+      <section className="bg-card rounded-xl border border-border p-5 shadow-sm mb-6">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">🎨 Appearance</h2>
+        
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-sm font-semibold text-primary block">Theme</span>
+            <span className="text-xs text-muted-foreground">Switch between light and dark themes.</span>
+          </div>
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="p-3 rounded-lg border border-border hover:bg-muted transition-colors flex items-center gap-2"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun size={18} />
+                <span className="text-sm font-medium">Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon size={18} />
+                <span className="text-sm font-medium">Dark Mode</span>
+              </>
+            )}
+          </button>
         </div>
       </section>
 
