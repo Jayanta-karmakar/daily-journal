@@ -29,7 +29,7 @@ export default function Login() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
       {/* Decorative Blob */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] pointer-events-none"></div>
-      
+
       <div className="w-full max-w-[440px] z-10">
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <Link to="/" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -37,7 +37,7 @@ export default function Login() {
           </Link>
           <ThemeToggle />
         </div>
-        
+
         <div className="bg-card/95 backdrop-blur-xl border border-border rounded-[2rem] p-8 shadow-2xl relative">
           <div className="mb-8 text-center">
             <div className="flex items-center justify-center mx-auto mb-4">
@@ -98,7 +98,7 @@ export default function Login() {
           {/* Divider */}
           <div className="relative flex items-center mb-5 mt-8">
             <div className="flex-grow border-t border-border" />
-            <span className="mx-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 shrink-0">or continue with email</span>
+            <span className="mx-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 shrink-0">or</span>
             <div className="flex-grow border-t border-border" />
           </div>
 
@@ -106,7 +106,7 @@ export default function Login() {
           <div className="mb-6">
             <OAuthButtons mode="login" />
           </div>
-          
+
           <div className="mt-8 text-center text-sm">
             <span className="text-muted-foreground">Don't have an account? </span>
             <Link to="/register" className="font-semibold text-primary hover:underline">Create Account</Link>
