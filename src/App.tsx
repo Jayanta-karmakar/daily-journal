@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import TopNav from "@/components/TopNav";
 import BottomNav from "@/components/BottomNav";
 import ScrollToTop from "@/components/ScrollToTop";
+import OfflineBanner from "@/components/OfflineBanner";
 import Dashboard from "./pages/Dashboard";
 import NewEntry from "./pages/NewEntry";
 import ViewEntry from "./pages/ViewEntry";
@@ -32,10 +33,14 @@ const AppContent = () => {
     return <div className="min-h-screen flex items-center justify-center text-foreground bg-background">Loading...</div>;
   }
   
+  const location = useLocation();
+  const isLegalPage = ["/privacy", "/terms", "/forgot-password", "/reset-password"].includes(location.pathname);
+
   if (!session) {
     return (
       <>
         <ScrollToTop />
+        <OfflineBanner />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -50,12 +55,10 @@ const AppContent = () => {
     );
   }
 
-  const location = useLocation();
-  const isLegalPage = ["/privacy", "/terms", "/forgot-password", "/reset-password"].includes(location.pathname);
-
   return (
     <>
       <ScrollToTop />
+      <OfflineBanner />
       {!isLegalPage && <TopNav />}
       <Routes>
         <Route path="/" element={<Dashboard />} />

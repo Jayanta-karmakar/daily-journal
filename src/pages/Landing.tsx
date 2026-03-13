@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Dumbbell, ShieldCheck, Wallet, Sparkles, Activity, CheckCircle2, ArrowRight, FileUp, Download, Github, Twitter, Mail } from 'lucide-react';
+import { BookOpen, Dumbbell, ShieldCheck, Wallet, Sparkles, CheckCircle2, ArrowRight, FileUp, Download, Github, Twitter, Mail } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import Logo from '@/components/Logo';
 
 const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) => (
   <div className="flex flex-col gap-4 p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:shadow-lg transition-all group">
@@ -20,9 +21,9 @@ export default function Landing() {
       {/* Navbar */}
       <header className="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-primary">
-            <Activity size={28} strokeWidth={2.5} />
-            <span className="text-xl font-bold tracking-tight text-foreground">MyDiary</span>
+          <div className="flex items-center gap-2 group">
+            <Logo size={34} className="transition-transform duration-200 group-hover:scale-110" />
+            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">MyDiary</span>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             <ThemeToggle />
@@ -305,7 +306,7 @@ export default function Landing() {
                   {/* Mock App Header */}
                   <div className="h-12 border-b border-border bg-card flex items-center px-4 justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm">📒</span>
+                      <Logo size={18} />
                       <div className="w-16 h-3 bg-muted rounded-full"></div>
                     </div>
                     <div className="flex gap-2 items-center">
@@ -362,9 +363,9 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
             {/* Brand Column */}
             <div className="space-y-8">
-              <div className="flex items-center gap-2 text-primary">
-                <Activity size={28} strokeWidth={2.5} />
-                <span className="text-2xl font-black tracking-tight text-foreground uppercase">MyDiary</span>
+              <div className="flex items-center gap-2 group">
+                <Logo size={32} className="transition-transform duration-200 group-hover:scale-110" />
+                <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent uppercase">MyDiary</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px]">
                 The complete daily journal and budget ledger designed for individuals who value privacy and progress above all else.

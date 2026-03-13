@@ -30,7 +30,9 @@ Follow these steps to set up the project locally.
 
 Ensure you have Node.js and npm (or bun) installed.
 
-### Installation
+### Initial Setup Workflow
+
+Follow these steps to get the project running locally on your machine along with its backend (Supabase).
 
 1. **Clone the repository:**
    ```bash
@@ -45,14 +47,39 @@ Ensure you have Node.js and npm (or bun) installed.
    bun install
    ```
 
-3. **Start the development server:**
+3. **Set up Environment Variables:**
+   - Copy the example environment file to create your local version:
+     ```bash
+     cp .env.example .env
+     ```
+   - Open your new `.env` file and replace the placeholder values with your Supabase project credentials.
+
+4. **Set up Supabase Backend:**
+   - Create a new project on [Supabase.com](https://supabase.com/).
+   - Go to the **SQL Editor** in your Supabase Dashboard.
+   - Open the `supabase-setup.sql` file from this repository and run the SQL script to create the required tables, Row Level Security (RLS) policies, and storage buckets.
+   - Go to **Project Settings -> API** to get your `Project URL` and `anon public` key. Paste these into your `.env` file.
+
+5. **Set up OAuth Providers (Social Login):**
+   - Head over to **Authentication -> Providers** in your Supabase Dashboard.
+   - Enable **Google**:
+     - Create an OAuth Client in the Google Cloud Console.
+     - Provide the required `Client ID` and `Client Secret` to Supabase.
+   - Enable **GitHub**:
+     - Create an OAuth App in GitHub Developer Settings.
+     - Provide the `Client ID` and `Client Secret` to Supabase.
+   - Enable **Apple**:
+     - Follow the Supabase guides to upload your Apple Service ID and secret key.
+   - *Note: No additional client-side environment variables are needed for OAuth; the `VITE_SUPABASE_URL` is enough because Supabase handles provider secure keys on its servers.*
+
+6. **Start the development server:**
    ```bash
    npm run dev
    # or
    bun run dev
    ```
 
-4. Open your browser and navigate to `http://localhost:5173` (or the URL provided in the terminal).
+7. Open your browser and navigate to `http://localhost:5173`.
 
 ## Scripts
 

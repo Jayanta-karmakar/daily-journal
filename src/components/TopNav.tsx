@@ -2,9 +2,10 @@ import { NavLink } from 'react-router-dom';
 import { Home, PenSquare, BarChart3, Settings, User } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useAppContext } from '@/context/AppContext';
+import Logo from './Logo';
 
 const TopNav = () => {
-  const { session } = useAppContext();
+  const { session, isOnline, isSyncing } = useAppContext();
   
   const linkClass = (isActive: boolean) =>
     `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -14,10 +15,10 @@ const TopNav = () => {
   const displayName = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'User';
 
   return (
-    <nav className="flex items-center justify-between gap-1 bg-card border-b border-border px-4 md:px-6 py-3 sticky top-0 z-50">
-      <NavLink to="/" className="flex items-center gap-1.5 md:mr-6">
-        <span className="text-xl">📒</span>
-        <span className="text-lg font-bold text-primary">MyDiary</span>
+    <nav className={`flex items-center justify-between gap-1 bg-card border-b border-border px-4 md:px-6 py-3 sticky z-40 transition-all duration-300 ${(!isOnline || isSyncing) ? 'top-7 mt-7' : 'top-0'}`}>
+      <NavLink to="/" className="flex items-center gap-2 md:mr-6 group">
+        <Logo size={30} className="drop-shadow-sm transition-transform duration-200 group-hover:scale-110" />
+        <span className="text-lg font-bold bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">MyDiary</span>
       </NavLink>
       <div className="hidden md:flex flex-1 justify-center gap-1">
         <NavLink to="/" className={({ isActive }) => linkClass(isActive)}>
