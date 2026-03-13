@@ -16,7 +16,7 @@ import { Loader2, CheckCircle2 } from 'lucide-react';
 type FilterTab = 'all' | 'ready' | 'warning' | 'error';
 
 export const ImportSection = () => {
-  const { entries, addEntry, updateEntry } = useAppContext();
+  const { entries, addEntry, updateEntry, refreshEntries } = useAppContext();
   
   const [fileDetails, setFileDetails] = useState<{ name: string; size: number } | null>(null);
   const [parsedEntries, setParsedEntries] = useState<ParsedEntry[]>([]);
@@ -119,6 +119,7 @@ export const ImportSection = () => {
       }
     }
 
+    await refreshEntries();
     setIsImporting(false);
     setImportSummary({ added, skipped });
     setShowSuccessModal(true);
@@ -139,7 +140,7 @@ export const ImportSection = () => {
             </div>
             <div className="text-center">
               <h3 className="text-xl font-black text-foreground mb-2">Importing Data</h3>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest animate-pulse">Please wait, don't close...</p>
+              <p className="text-xs font-bold text-foreground/60 uppercase tracking-widest animate-pulse">Please wait, don't close...</p>
             </div>
           </div>
         </div>
@@ -163,7 +164,7 @@ export const ImportSection = () => {
            </div>
            <div>
              <h2 className="text-base sm:text-lg font-bold text-foreground">Import from CSV</h2>
-             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Bring your legacy records exactly into MyDiary format</p>
+             <p className="text-xs sm:text-sm text-foreground/70 mt-0.5">Bring your legacy records exactly into MyDiary format</p>
            </div>
         </div>
       </div>
@@ -225,7 +226,7 @@ export const ImportSection = () => {
                   checked={filteredEntries.length > 0 && filteredEntries.every(e => e.selected)}
                   onChange={(e) => handleSelectAll(e.target.checked)}
                 />
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest select-none">Select All Visible</span>
+                <span className="text-xs font-bold text-foreground/70 uppercase tracking-widest select-none">Select All Visible</span>
               </div>
             </div>
 
