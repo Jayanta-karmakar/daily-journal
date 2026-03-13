@@ -85,3 +85,26 @@ export const getDayOfWeek = (dateStr: string): string => {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   return days[new Date(dateStr).getDay()];
 };
+
+export const getDailyTrend = (entries: DayEntry[]) => {
+  return [...entries].sort((a, b) => a.date.localeCompare(b.date)).map(e => ({
+    date: e.date,
+    spend: e.totalSpend,
+    invested: e.totalInvested
+  }));
+};
+
+export const getMonthlyTrend = (entries: DayEntry[]) => {
+  const months: Record<string, { month: string, spend: number, invested: number }> = {};
+
+  entries.forEach(e => {
+    const monthKey = e.date.slice(0, 7); // YYYY-MM
+    if (!months[monthKey]) {
+      months[monthKey] = { month: monthKey, spend: 0, invested: 0 };
+    }
+    months[monthKey].spend += e.totalSpend;
+    months[monthKey].invested += e.totalInvested;
+  });
+
+  return Object.values(months).sort((a, b) => a.month.localeCompare(b.month));
+};

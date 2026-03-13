@@ -29,6 +29,9 @@ interface AppContextType {
   deleteAllEntries: () => Promise<void>;
   isOnline: boolean;
   isSyncing: boolean;
+  refreshEntries: () => Promise<void>;
+  deleteMonthEntries: (month: string) => Promise<void>;
+  deleteYearEntries: (year: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -191,8 +194,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Optimistic Update
-    const newEntries = [entry, ...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setEntries(newEntries);
+    setEntries(prev => [entry, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     await saveOfflineEntry(entry);
 
     if (!session?.user?.id) return;
@@ -238,8 +240,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const updateEntry = async (entry: DayEntry) => {
     // Optimistic Update
-    const updatedEntries = entries.map(e => e.date === entry.date ? entry : e);
-    setEntries(updatedEntries);
+    setEntries(prev => prev.map(e => e.date === entry.date ? entry : e));
     await saveOfflineEntry(entry);
 
     if (!session?.user?.id) return;
@@ -291,7 +292,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const deleteEntry = async (date: string) => {
     // Optimistic Delete
-    setEntries(entries.filter(e => e.date !== date));
+    setEntries(prev => prev.filter(e => e.date !== date));
     await deleteOfflineEntry(date);
 
     if (!session?.user?.id) return;
@@ -332,6 +333,58 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const getEntryByDate = (date: string) => entries.find((e) => e.date === date);
 
+  const deleteMonthEntries = async (month: string) => {
+    // Optimistic Delete
+    setEntries(prev => prev.filter(e => e.date.slice(0, 7) !== month));
+    
+    if (!session?.user?.id) return;
+
+    if (!isOnline) {
+      toast('Changes cached. Will sync when back online.', { icon: '🔄' });
+      // For bulk deletes in offline mode, we'd need a more complex sync queue. 
+      // For now, let's just trigger individual sync items or refresh later.
+      return;
+    }
+
+    const { error } = await supabase
+      .from('entries')
+      .delete()
+      .eq('user_id', session.user.id)
+      .like('date', `${month}%`);
+
+    if (error) {
+      toast.error('Failed to delete some entries.');
+      await fetchEntries(); // Revert
+    } else {
+      toast.success(`Records for ${month} cleared`);
+    }
+  };
+
+  const deleteYearEntries = async (year: string) => {
+    // Optimistic Delete
+    setEntries(prev => prev.filter(e => e.date.slice(0, 4) !== year));
+    
+    if (!session?.user?.id) return;
+
+    if (!isOnline) {
+      toast('Changes cached. Will sync when back online.', { icon: '🔄' });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('entries')
+      .delete()
+      .eq('user_id', session.user.id)
+      .like('date', `${year}%`);
+
+    if (error) {
+      toast.error('Failed to delete some entries.');
+      await fetchEntries(); // Revert
+    } else {
+      toast.success(`Records for ${year} cleared`);
+    }
+  };
+
   const logout = async () => {
     await clearOfflineEntries();
     await supabase.auth.signOut();
@@ -341,7 +394,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     <AppContext.Provider value={{ 
       entries, config, setConfig, addEntry, updateEntry, 
       getEntryByDate, session, loading, logout, deleteEntry, 
-      deleteAllEntries, isOnline, isSyncing 
+      deleteAllEntries, isOnline, isSyncing, refreshEntries: fetchEntries,
+      deleteMonthEntries, deleteYearEntries
     }}>
       {children}
     </AppContext.Provider>

@@ -13,22 +13,46 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { entries, config } = useAppContext();
 
-  const totalSpend = getMonthTotalSpend(entries);
-  const totalInvested = getMonthTotalInvested(entries);
+  const currentMonthEntries = entries.filter((e) => {
+    const entryMonth = e.date.slice(0, 7);
+    return entryMonth === config.month;
+  });
+
+  const totalSpend = getMonthTotalSpend(currentMonthEntries);
+  const totalInvested = getMonthTotalInvested(currentMonthEntries);
   const remaining = getRemaining(config.salary, totalSpend);
-  const workingDays = getWorkingDays(entries);
-  const gymDays = getGymDays(entries);
-  const { current: currentStreak, best: bestStreak } = getGymStreak(entries);
-  const zeroSpendDays = getZeroSpendDays(entries);
+  const workingDays = getWorkingDays(currentMonthEntries);
+  const gymDays = getGymDays(currentMonthEntries);
+  const { current: currentStreak, best: bestStreak } = getGymStreak(currentMonthEntries);
+  const zeroSpendDays = getZeroSpendDays(currentMonthEntries);
 
   const sorted = [...entries].sort((a, b) => b.date.localeCompare(a.date));
+
+  // Group entries by 'YYYY-MM'
+  const groupedEntries = sorted.reduce((acc, entry) => {
+    const monthYearStr = entry.date.slice(0, 7); // e.g. "2026-03"
+    if (!acc[monthYearStr]) acc[monthYearStr] = [];
+    acc[monthYearStr].push(entry);
+    return acc;
+  }, {} as Record<string, typeof entries>);
+
+  const groupKeys = Object.keys(groupedEntries).sort((a, b) => b.localeCompare(a));
+
+  const formatMonthYear = (yyyy_mm: string) => {
+    if (!yyyy_mm) return '';
+    const [year, month] = yyyy_mm.split('-');
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${monthNames[parseInt(month, 10) - 1]} ${year}`;
+  };
+
+  const currentMonthDisplay = config?.month ? formatMonthYear(config.month) : new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-lg font-semibold text-muted-foreground">March 2026</p>
+        <p className="text-lg font-semibold text-muted-foreground">{currentMonthDisplay}</p>
       </div>
 
       {/* Stats */}
@@ -73,11 +97,24 @@ const Dashboard = () => {
       )}
 
       {/* Entries */}
-      <h2 className="text-lg font-bold text-foreground mb-3">📝 Entries — March 2026</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-        {sorted.map((entry) => (
-          <EntryCard key={entry.id} entry={entry} />
+      <div className="space-y-8 mt-6">
+        {groupKeys.map((monthYearStr) => (
+          <div key={monthYearStr}>
+            <h2 className="text-lg font-bold text-foreground mb-3 border-b border-border pb-2">
+              📝 {formatMonthYear(monthYearStr)}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {groupedEntries[monthYearStr].map((entry) => (
+                <EntryCard key={entry.id} entry={entry} />
+              ))}
+            </div>
+          </div>
         ))}
+        {groupKeys.length === 0 && (
+          <div className="text-center text-muted-foreground py-8">
+            No entries found. Click the + button to add one!
+          </div>
+        )}
       </div>
 
       {/* FAB */}
