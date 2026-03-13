@@ -20,12 +20,7 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
 
-    const phoneRegex = /^\+?[\d\s\-()]{7,15}$/;
-    if (!phoneRegex.test(phone)) {
-      toast.error('Please enter a valid phone number.');
-      setLoading(false);
-      return;
-    }
+    // Native HTML5 form validation handles the 10-digit requirement via minLength/maxLength/pattern
 
     const { data, error } = await supabase.auth.signUp({ 
       email, 
@@ -62,61 +57,79 @@ export default function Register() {
           <ThemeToggle />
         </div>
         
-        <div className="bg-card/95 backdrop-blur-xl border border-border rounded-[2rem] p-6 shadow-2xl relative">
-          <div className="mb-6 text-center">
-            <div className="flex items-center justify-center mx-auto mb-3">
-              <Logo size={48} className="drop-shadow-lg" />
+        <div className="bg-card/95 backdrop-blur-xl border border-border rounded-[2rem] p-5 shadow-2xl relative">
+          <div className="mb-4 text-center">
+            <div className="flex items-center justify-center mx-auto mb-2">
+              <Logo size={40} className="drop-shadow-lg" />
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">Create Account</h2>
-            <p className="text-sm text-muted-foreground mt-1 font-medium">Join MyDiary today.</p>
+            <p className="text-sm text-muted-foreground mt-0.5 font-medium">Join MyDiary today.</p>
           </div>
 
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <form onSubmit={handleRegister} className="space-y-3">
+            <div className="space-y-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 ml-1">Full Name</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 ml-1">Full Name</label>
                   <input
                     type="text"
                     required
                     placeholder="John Doe"
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      // Only allow letters and spaces
+                      if (/^[a-zA-Z\s]*$/.test(val)) {
+                        setFullName(val);
+                      }
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 ml-1">Phone Number</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 ml-1">Phone Number</label>
                   <input
                     type="tel"
                     required
-                    placeholder="+1 (555) 000-0000"
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
+                    minLength={10}
+                    maxLength={10}
+                    pattern="\d{10}"
+                    title="Please enter exactly 10 digits"
+                    placeholder="Enter 10-digit number"
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      // Only allow numeric input, and max 10 characters realtime
+                      if (/^\d*$/.test(val) && val.length <= 10) {
+                        setPhone(val);
+                      }
+                    }}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 ml-1">Email Address</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 ml-1">Email Address</label>
                 <input
                   type="email"
                   required
+                  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                  title="Please enter a valid email address"
                   placeholder="you@example.com"
-                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="relative">
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 ml-1">Choose Password</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 ml-1">Choose Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     minLength={6}
                     placeholder="Minimum 6 characters"
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50 pr-11"
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50 pr-11"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -133,30 +146,30 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 mt-2 rounded-xl shadow-md text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+              className="w-full py-2.5 px-4 mt-1.5 rounded-xl shadow-md text-sm font-bold text-primary-foreground bg-primary hover:bg-primary/90 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="relative flex items-center mb-5 mt-8">
+          <div className="relative flex items-center mt-5 mb-4">
             <div className="flex-grow border-t border-border" />
             <span className="mx-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 shrink-0">or</span>
             <div className="flex-grow border-t border-border" />
           </div>
 
           {/* OAuth Providers */}
-          <div className="mb-5">
+          <div className="mb-4">
             <OAuthButtons mode="register" />
           </div>
 
-          <div className="mt-8 text-center text-sm">
+          <div className="mt-5 text-center text-sm">
             <span className="text-muted-foreground">Already have an account? </span>
             <Link to="/login" className="font-semibold text-primary hover:underline">Sign in</Link>
           </div>
         </div>
-        <p className="text-xs text-center text-muted-foreground mt-6 px-4">
+        <p className="text-xs text-center text-muted-foreground mt-4 px-4">
           By registering, you agree to our strict zero-knowledge privacy policy.
         </p>
       </div>

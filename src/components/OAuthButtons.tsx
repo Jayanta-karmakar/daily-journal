@@ -78,7 +78,7 @@ export function OAuthButtons({ mode }: OAuthButtonsProps) {
   ];
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {providerConfig.map(({ id, label, icon, className }) => (
         <button
           key={id}
@@ -86,7 +86,7 @@ export function OAuthButtons({ mode }: OAuthButtonsProps) {
           disabled={loadingProvider !== null}
           onClick={() => handleOAuth(id)}
           className={`
-            relative w-full flex items-center justify-center gap-3 px-4 py-2.5
+            relative w-full flex items-center justify-center gap-3 px-4 py-2
             rounded-xl border bg-background/50 text-sm font-semibold
             text-foreground transition-all duration-200
             focus:outline-none focus:ring-2 focus:ring-primary/40
