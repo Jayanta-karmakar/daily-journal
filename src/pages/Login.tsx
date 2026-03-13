@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Activity, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import Logo from '@/components/Logo';
+import { OAuthButtons } from '@/components/OAuthButtons';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -38,8 +40,8 @@ export default function Login() {
         
         <div className="bg-card/95 backdrop-blur-xl border border-border rounded-[2rem] p-8 shadow-2xl relative">
           <div className="mb-8 text-center">
-            <div className="w-14 h-14 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
-              <Activity size={32} strokeWidth={2.5} />
+            <div className="flex items-center justify-center mx-auto mb-4">
+              <Logo size={56} className="drop-shadow-lg" />
             </div>
             <h2 className="text-2xl font-black text-foreground tracking-tight">Welcome Back</h2>
             <p className="text-sm text-muted-foreground mt-1 font-medium">Log in to MyDiary.</p>
@@ -92,6 +94,18 @@ export default function Login() {
               {loading ? 'Authenticating...' : 'Secure Sign In'}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="relative flex items-center mb-5 mt-8">
+            <div className="flex-grow border-t border-border" />
+            <span className="mx-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 shrink-0">or continue with email</span>
+            <div className="flex-grow border-t border-border" />
+          </div>
+
+          {/* OAuth Providers */}
+          <div className="mb-6">
+            <OAuthButtons mode="login" />
+          </div>
           
           <div className="mt-8 text-center text-sm">
             <span className="text-muted-foreground">Don't have an account? </span>

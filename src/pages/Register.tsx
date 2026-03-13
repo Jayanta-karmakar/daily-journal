@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Activity, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import Logo from '@/components/Logo';
+import { OAuthButtons } from '@/components/OAuthButtons';
 
 export default function Register() {
   const [fullName, setFullName] = useState('');
@@ -62,8 +64,8 @@ export default function Register() {
         
         <div className="bg-card/95 backdrop-blur-xl border border-border rounded-[2rem] p-6 shadow-2xl relative">
           <div className="mb-6 text-center">
-            <div className="w-12 h-12 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-primary/30">
-              <Activity size={24} strokeWidth={2.5} />
+            <div className="flex items-center justify-center mx-auto mb-3">
+              <Logo size={48} className="drop-shadow-lg" />
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">Create Account</h2>
             <p className="text-sm text-muted-foreground mt-1 font-medium">Join MyDiary today.</p>
@@ -136,7 +138,19 @@ export default function Register() {
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
-          
+
+          {/* Divider */}
+          <div className="relative flex items-center mb-5 mt-8">
+            <div className="flex-grow border-t border-border" />
+            <span className="mx-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 shrink-0">or</span>
+            <div className="flex-grow border-t border-border" />
+          </div>
+
+          {/* OAuth Providers */}
+          <div className="mb-5">
+            <OAuthButtons mode="register" />
+          </div>
+
           <div className="mt-8 text-center text-sm">
             <span className="text-muted-foreground">Already have an account? </span>
             <Link to="/login" className="font-semibold text-primary hover:underline">Sign in</Link>
