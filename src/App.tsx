@@ -82,7 +82,7 @@ const AppContent = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="dark" storageKey="daily-journal-theme">
+    <ThemeProvider defaultTheme="light" storageKey="daily-journal-theme-v2">
       <TooltipProvider>
         <Sonner />
         <AppProvider>
