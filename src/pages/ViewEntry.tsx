@@ -22,7 +22,7 @@ const typeBadge: Record<string, string> = {
 const ViewEntry = () => {
   const { date } = useParams<{ date: string }>();
   const navigate = useNavigate();
-  const { getEntryByDate, deleteEntry } = useAppContext();
+  const { getEntryByDate, deleteEntry, config } = useAppContext();
   const entry = getEntryByDate(date || '');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -117,19 +117,19 @@ const ViewEntry = () => {
                       {exp.type}
                     </span>
                   </td>
-                  <td className="py-3 px-3 text-right font-semibold text-foreground">{formatCurrency(exp.amount)}</td>
+                  <td className="py-3 px-3 text-right font-semibold text-foreground">{formatCurrency(exp.amount, config.currency)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot className="border-t-2 border-border">
               <tr>
                 <td colSpan={2} className="py-3 px-3 font-bold text-foreground">Actual Spend (Need + Want)</td>
-                <td className="py-3 px-3 text-right font-bold text-foreground">{formatCurrency(entry.totalSpend)}</td>
+                <td className="py-3 px-3 text-right font-bold text-foreground">{formatCurrency(entry.totalSpend, config.currency)}</td>
               </tr>
               {entry.totalInvested > 0 && (
                 <tr>
                   <td colSpan={2} className="py-2 px-3 font-bold text-investment">Invested</td>
-                  <td className="py-2 px-3 text-right font-bold text-investment">{formatCurrency(entry.totalInvested)}</td>
+                  <td className="py-2 px-3 text-right font-bold text-investment">{formatCurrency(entry.totalInvested, config.currency)}</td>
                 </tr>
               )}
             </tfoot>

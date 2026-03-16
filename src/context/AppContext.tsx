@@ -119,9 +119,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         salary: data.salary,
         dailySpendLimit: data.daily_spend_limit,
         monthlyBudget: data.monthly_budget,
+        currency: data.currency || 'INR',
       };
       setConfigState(upToDateConfig);
       await saveOfflineConfig(upToDateConfig);
+    } else {
+      // If no config for current month, try to get the latest one to "lock" the currency choice
+      const { data: latestData } = await supabase
+        .from('month_configs')
+        .select('currency')
+        .eq('user_id', session.user.id)
+        .order('month', { ascending: false })
+        .limit(1);
+      
+      if (latestData && latestData.length > 0 && latestData[0].currency) {
+        setConfigState(prev => ({ ...prev, currency: latestData[0].currency }));
+      }
     }
   };
 
@@ -179,6 +192,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         salary: newConfig.salary,
         daily_spend_limit: newConfig.dailySpendLimit,
         monthly_budget: newConfig.monthlyBudget,
+        currency: newConfig.currency,
       }, { onConflict: 'user_id, month' });
 
     if (error) {

@@ -1,4 +1,7 @@
+import { useAppContext } from '@/context/AppContext';
+import { currencies } from '@/data/currencies';
 import type { Expense } from '@/data/mockData';
+import { useMemo } from 'react';
 
 interface ExpenseRowProps {
   expense: { amount: string; label: string; type: Expense['type'] };
@@ -7,20 +10,26 @@ interface ExpenseRowProps {
   error?: string;
 }
 
-const ExpenseRow = ({ expense, onChange, onDelete, error }: ExpenseRowProps) => (
-  <div>
-    <div className="flex gap-2 items-center">
-      <div className="w-[25%] relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">₹</span>
-        <input
-          type="number"
-          min="0"
-          className="w-full pl-7 pr-2 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-          placeholder="0"
-          value={expense.amount}
-          onChange={(e) => onChange('amount', e.target.value)}
-        />
-      </div>
+const ExpenseRow = ({ expense, onChange, onDelete, error }: ExpenseRowProps) => {
+  const { config } = useAppContext();
+  const currentCurrency = useMemo(() => 
+    currencies.find(c => c.code === config.currency) || currencies.find(c => c.code === 'INR')!
+  , [config.currency]);
+
+  return (
+    <div>
+      <div className="flex gap-2 items-center">
+        <div className="w-[25%] relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currentCurrency.symbol}</span>
+          <input
+            type="number"
+            min="0"
+            className="w-full pl-7 pr-2 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+            placeholder="0"
+            value={expense.amount}
+            onChange={(e) => onChange('amount', e.target.value)}
+          />
+        </div>
       <input
         className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
         placeholder="Label / Reason"
@@ -47,6 +56,7 @@ const ExpenseRow = ({ expense, onChange, onDelete, error }: ExpenseRowProps) => 
     </div>
     {error && <p className="text-destructive text-xs mt-1 ml-1">{error}</p>}
   </div>
-);
+  );
+};
 
 export default ExpenseRow;

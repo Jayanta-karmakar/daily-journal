@@ -9,6 +9,11 @@ import { ImportSection } from '@/components/import/ImportSection';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { format, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { currencies } from '@/data/currencies';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -18,6 +23,11 @@ const SettingsPage = () => {
   const [salary, setSalary] = useState(config.salary.toString());
   const [limit, setLimit] = useState(config.dailySpendLimit.toString());
   const [budget, setBudget] = useState(config.monthlyBudget.toString());
+  const [currency, setCurrency] = useState(config.currency || 'INR');
+  
+  const currentCurrency = useMemo(() => 
+    currencies.find(c => c.code === currency) || currencies.find(c => c.code === 'INR')!
+  , [currency]);
   
   const [showClearAllModal, setShowClearAllModal] = useState(false);
   const [showDeleteMonthModal, setShowDeleteMonthModal] = useState(false);
@@ -25,6 +35,9 @@ const SettingsPage = () => {
   
   const [targetMonth, setTargetMonth] = useState<string>('');
   const [targetYear, setTargetYear] = useState<string>('');
+  const [openCurrencyPicker, setOpenCurrencyPicker] = useState(false);
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [pendingCurrency, setPendingCurrency] = useState<string | null>(null);
 
   const availableYears = useMemo(() => {
     const years = new Set<string>();
@@ -44,8 +57,31 @@ const SettingsPage = () => {
       salary: parseInt(salary) || 0,
       dailySpendLimit: parseInt(limit) || 0,
       monthlyBudget: parseInt(budget) || 0,
+      currency: currency,
     });
-    toast.success('Settings saved successfully!');
+    toast.success('Budget settings saved!');
+  };
+
+  const handleCurrencyChange = (newCurrencyCode: string) => {
+    const selected = currencies.find(c => c.code === newCurrencyCode);
+    if (!selected) return;
+    
+    setPendingCurrency(newCurrencyCode);
+    setShowCurrencyModal(true);
+  };
+
+  const confirmCurrencyChange = async () => {
+    if (!pendingCurrency) return;
+    
+    setCurrency(pendingCurrency);
+    await setConfig({
+      ...config,
+      currency: pendingCurrency
+    });
+    
+    setShowCurrencyModal(false);
+    setPendingCurrency(null);
+    toast.success(`Currency changed to ${pendingCurrency}`);
   };
 
   const handleLogout = async () => {
@@ -90,39 +126,39 @@ const SettingsPage = () => {
                 <label className="block">
                   <span className="text-[10px] font-black text-foreground/60 uppercase tracking-[0.2em] mb-3 block">Monthly Salary</span>
                   <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">₹</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">{currentCurrency.symbol}</span>
                     <input type="number" value={salary} onChange={(e) => setSalary(e.target.value)}
                       className="w-full pl-9 pr-4 py-4 rounded-2xl border border-border bg-background text-base font-black focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-inner" />
                   </div>
                   <div className="flex justify-between items-center mt-3 px-1">
                     <span className="text-[10px] font-bold text-foreground/70 uppercase tracking-tighter">Net take-home</span>
-                    <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(salary) || 0)}</span>
+                    <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(salary) || 0, currency)}</span>
                   </div>
                 </label>
 
                 <label className="block">
                   <span className="text-[10px] font-black text-foreground/60 uppercase tracking-[0.2em] mb-3 block">Daily Spend Limit</span>
                   <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">₹</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">{currentCurrency.symbol}</span>
                     <input type="number" value={limit} onChange={(e) => setLimit(e.target.value)}
                       className="w-full pl-9 pr-4 py-4 rounded-2xl border border-border bg-background text-base font-black focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-inner" />
                   </div>
                   <div className="flex justify-between items-center mt-3 px-1">
                      <span className="text-[10px] font-bold text-foreground/70 uppercase tracking-tighter">Threshold flag</span>
-                     <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(limit) || 0)}</span>
+                     <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(limit) || 0, currency)}</span>
                   </div>
                 </label>
 
                 <label className="block">
                   <span className="text-[10px] font-black text-foreground/60 uppercase tracking-[0.2em] mb-3 block">Monthly Budget</span>
                    <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">₹</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">{currentCurrency.symbol}</span>
                     <input type="number" value={budget} onChange={(e) => setBudget(e.target.value)}
                       className="w-full pl-9 pr-4 py-4 rounded-2xl border border-border bg-background text-base font-black focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-inner" />
                   </div>
                   <div className="flex justify-between items-center mt-3 px-1">
                     <span className="text-[10px] font-bold text-foreground/70 uppercase tracking-tighter">Combined (N+W)</span>
-                    <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(budget) || 0)}</span>
+                    <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(budget) || 0, currency)}</span>
                   </div>
                 </label>
              </div>
@@ -170,6 +206,83 @@ const SettingsPage = () => {
                    </>
                  )}
                </button>
+             </div>
+          </div>
+        </section>
+
+        {/* CURRENCY SETTINGS */}
+        <section className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div className="p-5 sm:p-6 border-b border-border bg-muted/10 flex items-center gap-4">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl hidden sm:block">
+              <span className="text-xl font-bold">{currentCurrency.symbol}</span>
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-foreground">Currency</h2>
+              <p className="text-xs sm:text-sm text-foreground/60 mt-0.5">Choose your preferred currency for the application</p>
+            </div>
+          </div>
+          
+          <div className="p-6 md:p-8">
+             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4 max-w-xl">
+               <div className="flex-1">
+                 <span className="text-sm font-bold text-foreground block">Select Currency</span>
+                 <span className="text-xs text-foreground/60">Search and pick your preferred currency.</span>
+               </div>
+               
+               <Popover open={openCurrencyPicker} onOpenChange={setOpenCurrencyPicker}>
+                 <PopoverTrigger asChild>
+                   <button
+                     role="combobox"
+                     aria-expanded={openCurrencyPicker}
+                     className="w-full sm:w-[320px] h-14 rounded-2xl border border-border bg-background px-4 font-semibold shadow-sm text-sm flex items-center justify-between hover:bg-muted/50 transition-all"
+                   >
+                     <div className="flex items-center gap-3">
+                       <img src={`https://flagcdn.com/w40/${currentCurrency.flag}.png`} alt={currentCurrency.name} className="w-6 h-4 object-cover rounded-sm shadow-sm" />
+                       <span className="truncate">{currentCurrency.name} ({currentCurrency.code})</span>
+                     </div>
+                     <ChevronsUpDown size={16} className="text-muted-foreground shrink-0" />
+                   </button>
+                 </PopoverTrigger>
+                 <PopoverContent className="w-[320px] p-0 rounded-2xl border-border shadow-2xl" align="end">
+                   <Command>
+                     <CommandInput placeholder="Search currency..." className="h-12 border-none focus:ring-0 text-sm font-medium" />
+                     <CommandList className="max-h-[300px]">
+                       <CommandEmpty>No currency found.</CommandEmpty>
+                       <CommandGroup>
+                         {currencies.map((c) => (
+                           <CommandItem
+                             key={c.code}
+                             value={`${c.code} ${c.name}`}
+                             onSelect={() => {
+                               handleCurrencyChange(c.code);
+                               setOpenCurrencyPicker(false);
+                             }}
+                             className="flex items-center justify-between py-3 px-4 aria-selected:bg-primary aria-selected:text-primary-foreground cursor-pointer"
+                           >
+                             <div className="flex items-center gap-3">
+                               <img 
+                                 src={`https://flagcdn.com/w40/${c.flag}.png`} 
+                                 alt={c.name} 
+                                 className="w-6 h-4 object-cover rounded-sm border border-border/20" 
+                               />
+                               <div className="flex flex-col">
+                                 <span className="font-bold text-sm">{c.code}</span>
+                                 <span className="text-[10px] opacity-70 truncate max-w-[180px]">{c.name}</span>
+                               </div>
+                             </div>
+                             <Check
+                               className={cn(
+                                 "ml-auto h-4 w-4",
+                                 currency === c.code ? "opacity-100" : "opacity-0"
+                               )}
+                             />
+                           </CommandItem>
+                         ))}
+                       </CommandGroup>
+                     </CommandList>
+                   </Command>
+                 </PopoverContent>
+               </Popover>
              </div>
           </div>
         </section>
@@ -305,6 +418,19 @@ const SettingsPage = () => {
           message={`This will delete every single record from Jan 1st to Dec 31st of ${targetYear}. This cannot be undone.`}
           confirmText="Wipe Year Data"
           variant="danger"
+        />
+
+        <ConfirmModal 
+          isOpen={showCurrencyModal}
+          onClose={() => {
+            setShowCurrencyModal(false);
+            setPendingCurrency(null);
+          }}
+          onConfirm={confirmCurrencyChange}
+          title="Change Application Currency?"
+          message={`Are you sure you want to change the currency to ${pendingCurrency}? This will update how all prices and balances are displayed across the app immediately.`}
+          confirmText="Change Currency"
+          variant="info"
         />
 
       </div>

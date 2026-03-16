@@ -58,10 +58,10 @@ const EntryCard = ({ entry }: EntryCardProps) => {
       <p className="text-sm text-muted-foreground truncate mb-2">{entry.journalText}</p>
       <div className="flex justify-between items-center">
         <p className={`text-sm font-semibold ${isOverLimit ? 'text-destructive' : 'text-foreground'}`}>
-          Spent: {formatCurrency(entry.totalSpend)}
+          Spent: {formatCurrency(entry.totalSpend, config.currency)}
         </p>
         {entry.totalInvested > 0 && (
-          <p className="text-sm text-success font-medium">📈 {formatCurrency(entry.totalInvested)} invested</p>
+          <p className="text-sm text-success font-medium">📈 {formatCurrency(entry.totalInvested, config.currency)} invested</p>
         )}
       </div>
       {entry.notes && (
