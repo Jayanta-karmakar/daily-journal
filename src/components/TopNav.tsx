@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import { Home, PenSquare, BarChart3, Settings, User } from 'lucide-react';
+import { Home, PenSquare, BarChart3, Settings, User, ShieldCheck } from 'lucide-react';
+import { APP_ROUTES, AUTH_ROLES } from '@/config/constants';
 import { ThemeToggle } from './ThemeToggle';
 import { useAppContext } from '@/context/AppContext';
 import Logo from './Logo';
@@ -7,11 +8,10 @@ import { SearchModal } from './SearchModal';
 
 
 const TopNav = () => {
-  const { session, isOnline, isSyncing } = useAppContext();
-  
+  const { session, profile, isOnline, isSyncing } = useAppContext();
+
   const linkClass = (isActive: boolean) =>
-    `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-      isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'
+    `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'
     }`;
 
   const displayName = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'User';
@@ -35,6 +35,11 @@ const TopNav = () => {
         <NavLink to="/settings" className={({ isActive }) => linkClass(isActive)}>
           <Settings size={16} /> Settings
         </NavLink>
+        {profile?.role === AUTH_ROLES.ADMIN && (
+          <NavLink to={APP_ROUTES.ADMIN} className={({ isActive }) => `${linkClass(isActive)} border border-primary/20 bg-primary/5 hover:bg-primary/10`}>
+            <ShieldCheck size={16} className="text-primary" /> Admin
+          </NavLink>
+        )}
       </div>
       <div className="ml-auto flex items-center gap-3">
         <SearchModal />

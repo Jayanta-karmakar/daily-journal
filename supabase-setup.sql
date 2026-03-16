@@ -12,6 +12,8 @@
 CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT NOT NULL,
+    full_name TEXT,
+    phone TEXT,
     role TEXT NOT NULL DEFAULT 'user',
     is_banned BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -90,8 +92,15 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, role, is_banned)
-  VALUES (new.id, new.email, 'user', false);
+  INSERT INTO public.profiles (id, email, full_name, phone, role, is_banned)
+  VALUES (
+    new.id, 
+    new.email, 
+    (new.raw_user_meta_data->>'full_name'), 
+    (new.raw_user_meta_data->>'phone'), 
+    'user', 
+    false
+  );
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -153,8 +162,14 @@ CREATE POLICY "Admin can manage all pricing plans" ON pricing_plans
 -- ==========================================
 
 -- Backfill missing profiles for existing Auth users
-INSERT INTO public.profiles (id, email, role, is_banned)
-SELECT id, email, 'user', false
+INSERT INTO public.profiles (id, email, full_name, phone, role, is_banned)
+SELECT 
+  id, 
+  email, 
+  (raw_user_meta_data->>'full_name'), 
+  (raw_user_meta_data->>'phone'), 
+  'user', 
+  false
 FROM auth.users
 WHERE id NOT IN (SELECT id FROM public.profiles)
 ON CONFLICT (id) DO NOTHING;

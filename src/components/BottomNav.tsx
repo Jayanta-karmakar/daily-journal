@@ -1,15 +1,17 @@
 import { NavLink } from 'react-router-dom';
-import { Home, PenSquare, BarChart3, Settings } from 'lucide-react';
-import { APP_ROUTES } from '@/config/constants';
+import { Home, PenSquare, BarChart3, Settings, ShieldCheck } from 'lucide-react';
+import { APP_ROUTES, AUTH_ROLES } from '@/config/constants';
+import { useAppContext } from '@/context/AppContext';
 
 const BottomNav = () => {
+  const { profile } = useAppContext();
   const linkClass = (isActive: boolean) =>
-    `flex flex-col items-center gap-0.5 text-xs font-medium transition-colors ${
+    `flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${
       isActive ? 'text-primary' : 'text-muted-foreground'
     }`;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border px-2 py-2 z-50 flex justify-around">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-md border-t border-border px-2 py-3 z-50 flex justify-around">
       <NavLink to={APP_ROUTES.HOME} className={({ isActive }) => linkClass(isActive)}>
         <Home size={20} />
         <span>Home</span>
@@ -26,6 +28,12 @@ const BottomNav = () => {
         <Settings size={20} />
         <span>Settings</span>
       </NavLink>
+      {profile?.role === AUTH_ROLES.ADMIN && (
+        <NavLink to={APP_ROUTES.ADMIN} className={({ isActive }) => linkClass(isActive)}>
+          <ShieldCheck size={20} />
+          <span>Admin</span>
+        </NavLink>
+      )}
     </nav>
   );
 };
