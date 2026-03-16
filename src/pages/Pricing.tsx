@@ -216,7 +216,7 @@ export default function Pricing() {
               <div
                 key={plan.name}
                 className={cn(
-                  "relative flex flex-col p-8 rounded-[2rem] border transition-all duration-300 group overflow-hidden",
+                  "relative flex flex-col p-8 rounded-[2rem] border transition-all duration-300 group overflow-hidden h-96",
                   plan.popular
                     ? "bg-foreground text-background border-transparent shadow-2xl scale-[1.02] z-10"
                     : "bg-card text-foreground border-border hover:border-primary/50 shadow-sm"
@@ -224,7 +224,8 @@ export default function Pricing() {
               >
                 {/* Fire Background for Popular Plan */}
                 {plan.popular && (
-                  <div className="absolute inset-x-0 bottom-0 h-[65%] z-0 pointer-events-none opacity-90">
+                  // <div className="absolute inset-x-0 bottom-0 h-[65%] z-0 pointer-events-none opacity-90">
+                  <div className="absolute inset-x-0 bottom-0 h-[40%] z-0 pointer-events-none opacity-90">
                     <FireCanvas className="w-full h-full" />
                     <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-foreground/95"></div>
                   </div>
