@@ -25,7 +25,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
-
+import { Analytics } from '@vercel/analytics/react';
 
 const queryClient = new QueryClient();
 
@@ -100,6 +100,7 @@ const App = () => (
         <AppProvider>
           <BrowserRouter>
             <AppContent />
+            <Analytics />
           </BrowserRouter>
         </AppProvider>
       </TooltipProvider>
