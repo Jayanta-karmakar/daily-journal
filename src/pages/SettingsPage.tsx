@@ -250,67 +250,65 @@ const SettingsPage = () => {
 
         {/* ACCOUNT SECURITY - Password Setup */}
         <section className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-          <div className="p-5 sm:p-6 border-b border-border bg-muted/10 flex items-center gap-4">
-            <div className="p-2.5 bg-primary/10 text-primary rounded-xl hidden sm:block">
-              <Lock size={20} />
-            </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-foreground">Account Security</h2>
-              <p className="text-xs sm:text-sm text-foreground/60 mt-0.5">Set or update your login password</p>
+          <div className="p-4 sm:p-5 border-b border-border bg-muted/5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                <Lock size={18} />
+              </div>
+              <div>
+                <h2 className="text-sm sm:text-base font-bold text-foreground">Account Security</h2>
+                <p className="text-[10px] sm:text-xs text-foreground/60">Set or update your login password</p>
+              </div>
             </div>
           </div>
           
-          <div className="p-6 md:p-8">
-            <div className="max-w-xl space-y-6">
-              <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 mb-6">
-                <p className="text-xs font-semibold text-primary flex items-center gap-2">
-                  <Key size={14} /> Note for Social Users
-                </p>
-                <p className="text-[11px] text-foreground/60 mt-1">If you joined via Google or GitHub, setting a password allows you to log in using your email address directly in the future.</p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                   <label className="text-[10px] font-black text-foreground/60 uppercase tracking-widest ml-1">New Password</label>
-                   <div className="relative group">
+          <div className="p-5 sm:p-6">
+            <div className="flex flex-col md:flex-row gap-6 md:items-end">
+              <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                   <label className="text-[10px] font-bold text-foreground/60 uppercase tracking-wider ml-1">New Password</label>
+                   <div className="relative">
                      <input 
                        type={showPass ? 'text' : 'password'} 
                        value={newPassword} 
                        onChange={(e) => setNewPassword(e.target.value)}
                        placeholder="••••••••"
-                       className="w-full px-4 py-3.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all pr-12" 
+                       className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all pr-10" 
                      />
                      <button 
                         type="button"
                         onClick={() => setShowPass(!showPass)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                      >
-                       {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                       {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
                      </button>
                    </div>
                 </div>
 
-                <div className="space-y-2">
-                   <label className="text-[10px] font-black text-foreground/60 uppercase tracking-widest ml-1">Confirm Password</label>
+                <div className="space-y-1.5">
+                   <label className="text-[10px] font-bold text-foreground/60 uppercase tracking-wider ml-1">Confirm Password</label>
                    <input 
                      type={showPass ? 'text' : 'password'} 
                      value={confirmPassword} 
                      onChange={(e) => setConfirmPassword(e.target.value)}
                      placeholder="••••••••"
-                     className="w-full px-4 py-3.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all" 
+                     className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
                    />
                 </div>
               </div>
 
-              <div className="flex justify-end pt-2">
-                <button 
-                  onClick={handleUpdatePassword} 
-                  disabled={passLoading}
-                  className="px-6 py-2.5 rounded-xl bg-foreground text-background font-bold text-xs hover:bg-foreground/90 transition-all shadow-md disabled:opacity-50 flex items-center gap-2"
-                >
-                  {passLoading ? 'Updating...' : 'Set New Password'}
-                </button>
-              </div>
+              <button 
+                onClick={handleUpdatePassword} 
+                disabled={passLoading}
+                className="h-[42px] px-6 rounded-xl bg-foreground text-background font-bold text-xs hover:bg-foreground/90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                {passLoading ? 'Updating...' : 'Update Password'}
+              </button>
+            </div>
+            
+            <div className="mt-4 flex items-start gap-2 text-[10px] text-muted-foreground bg-muted/30 p-2.5 rounded-lg border border-border/50">
+              <Key size={12} className="shrink-0 mt-0.5 text-primary" />
+              <p>Social users (Google/GitHub) should set a password to enable direct email login in the future.</p>
             </div>
           </div>
         </section>
