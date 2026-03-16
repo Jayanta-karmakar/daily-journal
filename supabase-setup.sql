@@ -74,16 +74,16 @@ CREATE TABLE IF NOT EXISTS public.pricing_plans (
 -- ==========================================
 
 -- Function to check if the current user is an admin 
--- (Uses SECURITY DEFINER to bypass RLS recursion)
+-- (Uses SECURITY DEFINER and explicit search_path to bypass RLS recursion)
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean AS $$
+DECLARE
+  _role text;
 BEGIN
-  RETURN EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE id = auth.uid() AND role = 'admin'
-  );
+  SELECT role INTO _role FROM public.profiles WHERE id = auth.uid();
+  RETURN _role = 'admin';
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Function to automatically create a profile for new signups
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -117,9 +117,17 @@ ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pricing_plans ENABLE ROW LEVEL SECURITY;
 
 -- 4a. Profiles Policies
+-- Everyone can view their own profile
 CREATE POLICY "Users can view their own profile" ON profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Admin can view all profiles" ON profiles FOR SELECT USING (public.is_admin());
-CREATE POLICY "Admin can update profiles" ON profiles FOR UPDATE USING (public.is_admin());
+
+-- Admin bypass: use the is_admin() function, but also allow a direct email check to break recursion
+CREATE POLICY "Admin can view all profiles" ON profiles FOR SELECT USING (
+  (auth.jwt() ->> 'email' = 'jayantakarmakar998@gmail.com') OR (public.is_admin())
+);
+
+CREATE POLICY "Admin can update profiles" ON profiles FOR UPDATE USING (
+  (auth.jwt() ->> 'email' = 'jayantakarmakar998@gmail.com') OR (public.is_admin())
+);
 
 -- 4b. Month Configs Policies
 CREATE POLICY "Users can manage their own month config" ON month_configs 
