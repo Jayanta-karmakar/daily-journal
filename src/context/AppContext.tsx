@@ -346,11 +346,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    const [y, m] = month.split('-');
+    const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
+
     const { error } = await supabase
       .from('entries')
       .delete()
       .eq('user_id', session.user.id)
-      .like('date', `${month}%`);
+      .gte('date', `${month}-01`)
+      .lte('date', `${month}-${lastDay}`);
 
     if (error) {
       toast.error('Failed to delete some entries.');
@@ -375,7 +379,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       .from('entries')
       .delete()
       .eq('user_id', session.user.id)
-      .like('date', `${year}%`);
+      .gte('date', `${year}-01-01`)
+      .lte('date', `${year}-12-31`);
 
     if (error) {
       toast.error('Failed to delete some entries.');
