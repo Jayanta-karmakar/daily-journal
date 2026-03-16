@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, LogOut, Wallet, Palette, Save, Trash2, Calendar, Filter } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, LogOut, Wallet, Palette, Save, Trash2, Calendar, Filter, Eye, EyeOff, Key, Lock } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import { useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/data/calculations';
 import { toast } from 'sonner';
@@ -38,6 +39,12 @@ const SettingsPage = () => {
   const [openCurrencyPicker, setOpenCurrencyPicker] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [pendingCurrency, setPendingCurrency] = useState<string | null>(null);
+  
+  // Password State
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [passLoading, setPassLoading] = useState(false);
 
   const availableYears = useMemo(() => {
     const years = new Set<string>();
@@ -87,6 +94,37 @@ const SettingsPage = () => {
   const handleLogout = async () => {
     await logout();
     navigate('/');
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword || !confirmPassword) {
+      toast.error('Please fill in all password fields.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters.');
+      return;
+    }
+
+    setPassLoading(true);
+    const { error } = await supabase.auth.updateUser({ 
+      password: newPassword 
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Password updated successfully! You can now use this to log in.');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+    setPassLoading(false);
   };
 
   return (
@@ -207,6 +245,73 @@ const SettingsPage = () => {
                  )}
                </button>
              </div>
+          </div>
+        </section>
+
+        {/* ACCOUNT SECURITY - Password Setup */}
+        <section className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div className="p-5 sm:p-6 border-b border-border bg-muted/10 flex items-center gap-4">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl hidden sm:block">
+              <Lock size={20} />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-foreground">Account Security</h2>
+              <p className="text-xs sm:text-sm text-foreground/60 mt-0.5">Set or update your login password</p>
+            </div>
+          </div>
+          
+          <div className="p-6 md:p-8">
+            <div className="max-w-xl space-y-6">
+              <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 mb-6">
+                <p className="text-xs font-semibold text-primary flex items-center gap-2">
+                  <Key size={14} /> Note for Social Users
+                </p>
+                <p className="text-[11px] text-foreground/60 mt-1">If you joined via Google or GitHub, setting a password allows you to log in using your email address directly in the future.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                   <label className="text-[10px] font-black text-foreground/60 uppercase tracking-widest ml-1">New Password</label>
+                   <div className="relative group">
+                     <input 
+                       type={showPass ? 'text' : 'password'} 
+                       value={newPassword} 
+                       onChange={(e) => setNewPassword(e.target.value)}
+                       placeholder="••••••••"
+                       className="w-full px-4 py-3.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all pr-12" 
+                     />
+                     <button 
+                        type="button"
+                        onClick={() => setShowPass(!showPass)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                     >
+                       {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                     </button>
+                   </div>
+                </div>
+
+                <div className="space-y-2">
+                   <label className="text-[10px] font-black text-foreground/60 uppercase tracking-widest ml-1">Confirm Password</label>
+                   <input 
+                     type={showPass ? 'text' : 'password'} 
+                     value={confirmPassword} 
+                     onChange={(e) => setConfirmPassword(e.target.value)}
+                     placeholder="••••••••"
+                     className="w-full px-4 py-3.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all" 
+                   />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={handleUpdatePassword} 
+                  disabled={passLoading}
+                  className="px-6 py-2.5 rounded-xl bg-foreground text-background font-bold text-xs hover:bg-foreground/90 transition-all shadow-md disabled:opacity-50 flex items-center gap-2"
+                >
+                  {passLoading ? 'Updating...' : 'Set New Password'}
+                </button>
+              </div>
+            </div>
           </div>
         </section>
 
