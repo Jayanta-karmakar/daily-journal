@@ -64,7 +64,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         
         if (data && !error) {
           if (data.is_banned) {
-            toast.error('Your account has been banned. Please contact support.');
+            toast.error('Your account has been banned. Please contact support.', {
+              id: 'ban-notification'
+            });
             await logout();
             return;
           }
@@ -75,10 +77,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
       setIsInitialized(true);
     };
-
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      handleAuthChange(initialSession);
-    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       handleAuthChange(newSession);
