@@ -1,17 +1,12 @@
 import { Link } from 'react-router-dom';
-import { FileText, ArrowLeft, Scale, AlertCircle, Ban, HeartHandshake } from 'lucide-react';
+import { FileText, Scale, AlertCircle, Ban, HeartHandshake, ArrowLeft } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-background font-sans selection:bg-primary/20">
-      <header className="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
-            <ArrowLeft size={20} />
-            <span className="font-bold tracking-tight text-foreground">Back to MyDiary</span>
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="pt-32 pb-24 px-4 sm:px-8 max-w-4xl mx-auto">
         <div className="space-y-12">
@@ -105,6 +100,7 @@ export default function TermsOfService() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
