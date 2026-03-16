@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import FireCanvas from '@/components/FireCanvas';
 import Logo from '@/components/Logo';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 import { currencies } from '@/data/currencies';
@@ -47,41 +48,41 @@ const plans = [
     description: 'A lightweight way to try MyDiary. No cost, no card, no hassle.',
     price: 0,
     features: [
-      'Unlimited journal entries',
-      'Basic budget tracking',
-      'Daily workout logs',
-      'PWA & Offline support',
+      // 'Unlimited journal entries',
+      // 'Basic budget tracking',
+      // 'Daily workout logs',
+      // 'PWA & Offline support',
     ],
     buttonText: 'Get started',
-    popular: false,
+    popular: true,
   },
   {
     name: 'Hobby',
     description: 'Great for side projects and personal growth. Fast, simple, no fuss.',
     price: 10,
     features: [
-      'Everything in Free',
-      'Biometric lock (Mobile)',
-      'Export to PDF/CSV',
-      'Advanced monthly analytics',
-      'Custom categories',
+      // 'Everything in Free',
+      // 'Biometric lock (Mobile)',
+      // 'Export to PDF/CSV',
+      // 'Advanced monthly analytics',
+      // 'Custom categories',
     ],
-    buttonText: 'Subscribe',
-    popular: true,
+    buttonText: 'Coming Soon',
+    popular: false,
   },
   {
     name: 'Pro',
     description: 'Scaling with less effort. Trusted, dependable, and powerful.',
     price: 20,
     features: [
-      'Everything in Hobby',
-      'Priority cloud sync',
-      'Unlimited storage',
-      'AI-powered reflection',
-      'Multi-device sync',
-      'Family sharing (up to 3)',
+      // 'Everything in Hobby',
+      // 'Priority cloud sync',
+      // 'Unlimited storage',
+      // 'AI-powered reflection',
+      // 'Multi-device sync',
+      // 'Family sharing (up to 3)',
     ],
-    buttonText: 'Subscribe',
+    buttonText: 'Coming Soon',
     popular: false,
   },
   // {
@@ -124,24 +125,7 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-primary/20">
-      {/* Navbar */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <Logo size={34} className="transition-transform duration-200 group-hover:scale-110" />
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">MyDiary</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Link to="/login" className="text-sm font-semibold text-foreground hover:text-primary transition-colors hidden sm:block">
-              Log in
-            </Link>
-            <Link to="/register" className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm">
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-1 pt-32 pb-24">
         <section className="max-w-7xl mx-auto px-4 sm:px-8">
@@ -302,12 +286,44 @@ export default function Pricing() {
           </div>
 
           {/* Bottom Pitch */}
-          {/* <div className="mt-20 text-center">
-            <p className="text-muted-foreground text-sm flex items-center justify-center gap-2">
-              <Globe size={16} className="text-primary" />
-              Extra features are available via auto-recharge packs. <Link to="#" className="text-primary font-bold hover:underline">Enable ↗</Link>
-            </p>
-          </div> */}
+          <div className="mt-32">
+            <div className="relative max-w-5xl mx-auto p-8 sm:p-16 rounded-[3rem] bg-foreground text-background overflow-hidden shadow-2xl">
+              {/* Decorative background elements */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
+                <div className="flex-1">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/5 border border-background/10 text-[10px] font-black uppercase tracking-[0.2em] text-background/60 mb-8">
+                    <Globe size={16} className="text-primary animate-pulse" />
+                    Global Launching Soon
+                  </div>
+                  <h2 className="text-4xl sm:text-5xl font-black mb-6 tracking-tight leading-[1.1]">
+                    Pricing is on its way. <br />
+                    <span className="text-primary">Start for free today.</span>
+                  </h2>
+                  <p className="text-background/50 text-sm sm:text-lg max-w-xl font-medium leading-relaxed">
+                    We're currently scaling our payment infrastructure to support over 150+ currencies.
+                    Register today to lock in early-bird access and all standard features at no cost.
+                  </p>
+                </div>
+
+                <div className="shrink-0 flex flex-col items-center gap-6">
+                  <Link
+                    to="/register"
+                    className="group relative px-10 py-5 bg-background text-foreground rounded-2xl font-black text-base hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/20 flex items-center gap-3"
+                  >
+                    Claim Free Access
+                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <div className="flex items-center gap-2 text-[10px] font-black text-success uppercase tracking-[0.3em]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                    No credit card required
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
 

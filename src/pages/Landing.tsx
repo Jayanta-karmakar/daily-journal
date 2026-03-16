@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { BookOpen, Dumbbell, ShieldCheck, Wallet, Sparkles, CheckCircle2, ArrowRight, FileUp, Download } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import Logo from '@/components/Logo';
+import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) => (
@@ -19,24 +20,7 @@ const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode, title: stri
 export default function Landing() {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans overflow-x-hidden selection:bg-primary/20">
-      {/* Navbar */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 group">
-            <Logo size={34} className="transition-transform duration-200 group-hover:scale-110" />
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">MyDiary</span>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <ThemeToggle />
-            <Link to="/login" className="text-sm font-semibold text-foreground hover:text-primary transition-colors hidden sm:block">
-              Log in
-            </Link>
-            <Link to="/register" className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm">
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-1 pt-20">
         {/* Hero Section */}
