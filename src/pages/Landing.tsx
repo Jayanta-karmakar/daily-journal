@@ -168,17 +168,37 @@ export default function Landing() {
               <FeatureCard 
                 icon={<Wallet size={28} />} 
                 title="Budget Tracker" 
-                desc="Set monthly limits, separate precise needs vs wants, and monitor your spending visually." 
+                desc="Set monthly limits, separate precise needs vs wants, and monitor your spending with beautiful visual indicators." 
               />
               <FeatureCard 
                 icon={<Dumbbell size={28} />} 
                 title="Gym Ledger" 
-                desc="Never miss a workout. Keep yourself strictly accountable for your fitness goals." 
+                desc="Never miss a workout. Keep yourself strictly accountable for your fitness goals with easy session logging." 
               />
               <FeatureCard 
                 icon={<ShieldCheck size={28} />} 
                 title="Privacy First" 
-                desc="Extremely secure. Isolated tenant architecture means absolutely nobody else sees your entries." 
+                desc="Enterprise-grade security. Isolated architecture means absolutely nobody else sees your personal entries." 
+              />
+              <FeatureCard 
+                icon={<Sparkles size={28} />} 
+                title="PWA & Offline Mode" 
+                desc="Works seamlessly without internet. Your data stays on your device and syncs automatically when you're back online." 
+              />
+              <FeatureCard 
+                icon={<FileUp size={28} />} 
+                title="Bulk Portability" 
+                desc="Import years of data from CSV/Excel in seconds. Export your entire history anytime in standard formats." 
+              />
+              <FeatureCard 
+                icon={<CheckCircle2 size={28} />} 
+                title="Rich Analytics" 
+                desc="Visualize your progress with detailed monthly summaries, spending breakdowns, and habit tracking." 
+              />
+              <FeatureCard 
+                icon={<ArrowRight size={28} />} 
+                title="Responsive UI" 
+                desc="A stunning experience on any device. Switch between Dark and Light modes with a single click." 
               />
             </div>
           </div>
