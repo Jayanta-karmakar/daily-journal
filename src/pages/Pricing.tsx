@@ -22,7 +22,7 @@ const EXCHANGE_RATES: Record<string, number> = {
 };
 
 // Filtered list for the switcher (most common ones)
-const featuredCurrencies = currencies.filter(c => 
+const featuredCurrencies = currencies.filter(c =>
   ['USD', 'INR', 'EUR', 'GBP', 'JPY', 'CAD', 'AED', 'AUD', 'SGD'].includes(c.code)
 );
 
@@ -43,7 +43,7 @@ const plans = [
   {
     name: 'Hobby',
     description: 'Great for side projects and personal growth. Fast, simple, no fuss.',
-    price: 5,
+    price: 10,
     features: [
       'Everything in Free',
       'Biometric lock (Mobile)',
@@ -57,7 +57,7 @@ const plans = [
   {
     name: 'Pro',
     description: 'Scaling with less effort. Trusted, dependable, and powerful.',
-    price: 15,
+    price: 20,
     features: [
       'Everything in Hobby',
       'Priority cloud sync',
@@ -101,8 +101,8 @@ export default function Pricing() {
     return Math.round(converted).toString();
   };
 
-  const filteredCurrencies = currencies.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredCurrencies = currencies.filter(c =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.code.toLowerCase().includes(searchQuery.toLowerCase())
   ).slice(0, 50); // Limit results for performance
 
@@ -139,10 +139,10 @@ export default function Pricing() {
               Choose the plan that's <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-600">right for you</span>
             </h1>
-            
+
             {/* Currency Selector */}
             <div className="relative inline-block mt-4">
-              <button 
+              <button
                 onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border hover:border-primary/50 transition-all font-semibold text-sm"
               >
@@ -150,13 +150,13 @@ export default function Pricing() {
                 <span>IN {selectedCurrency.code}</span>
                 <ChevronDown size={14} className={cn("transition-transform", showCurrencyDropdown && "rotate-180")} />
               </button>
-              
+
               {showCurrencyDropdown && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-card border border-border rounded-xl shadow-xl z-20 py-2 overflow-hidden animate-in fade-in zoom-in duration-200">
                   <div className="px-3 py-1 border-b border-border mb-1">
-                    <input 
-                      type="text" 
-                      placeholder="Search currency..." 
+                    <input
+                      type="text"
+                      placeholder="Search currency..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full bg-transparent text-xs focus:outline-none py-1"
@@ -199,20 +199,20 @@ export default function Pricing() {
             plans.length >= 4 && "max-w-7xl grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
           )}>
             {plans.map((plan) => (
-              <div 
+              <div
                 key={plan.name}
                 className={cn(
                   "relative flex flex-col p-8 rounded-[2rem] border transition-all duration-300 group overflow-hidden",
-                  plan.popular 
-                    ? "bg-foreground text-background border-transparent shadow-2xl scale-[1.02] z-10" 
+                  plan.popular
+                    ? "bg-foreground text-background border-transparent shadow-2xl scale-[1.02] z-10"
                     : "bg-card text-foreground border-border hover:border-primary/50 shadow-sm"
                 )}
               >
                 {/* Fire Background for Popular Plan */}
                 {plan.popular && (
-                  <div className="absolute inset-x-0 bottom-0 h-[60%] z-0 pointer-events-none opacity-60 group-hover:opacity-80 transition-opacity">
+                  <div className="absolute inset-x-0 bottom-0 h-[65%] z-0 pointer-events-none opacity-90">
                     <FireCanvas className="w-full h-full" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-foreground/20 to-foreground"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-foreground/95"></div>
                   </div>
                 )}
 
@@ -226,11 +226,11 @@ export default function Pricing() {
                       </span>
                     )}
                   </div>
-                  
+
                   <p className={cn("text-xs mb-8 leading-relaxed", plan.popular ? "text-background/70" : "text-muted-foreground")}>
                     {plan.description}
                   </p>
-                  
+
                   <div className="mb-8 flex items-baseline gap-1">
                     <span className="text-4xl font-black">{selectedCurrency.symbol}{formatPrice(plan.price)}</span>
                     <span className={cn("text-[10px] font-bold uppercase tracking-widest", plan.popular ? "text-background/50" : "text-muted-foreground")}>
@@ -238,12 +238,12 @@ export default function Pricing() {
                     </span>
                   </div>
 
-                  <Link 
+                  <Link
                     to={plan.price === 0 ? "/register" : "#"}
                     className={cn(
                       "w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 mb-8",
-                      plan.popular 
-                        ? "bg-background text-foreground hover:bg-background/90" 
+                      plan.popular
+                        ? "bg-background text-foreground hover:bg-background/90"
                         : "bg-muted text-foreground hover:bg-primary hover:text-primary-foreground"
                     )}
                   >
