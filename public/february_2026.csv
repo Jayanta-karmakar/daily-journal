@@ -1,0 +1,33 @@
+Date,Day,Journal,Total Spend,Description,GYM,Note
+1 Feb,Sunday,Month starts. Cooked biryani at home.,250,200groceries+50chai,N,
+2 Feb,Monday,Office day. Sprint kickoff.,330,15bus+110lunch+15bus+100snacks+90dinner,Y,
+3 Feb,Tuesday,Office day. Bought System Design book.,650,15bus+110lunch+15bus+480book+40chai,Y,Interview prep
+4 Feb,Wednesday,Work from home. Deep focus day.,160,90orderFood+40chai+30fruits,N,
+5 Feb,Thursday,Office day. Evening run in the park.,340,15bus+110lunch+15bus+110snacks+90autoRickshaw,Y,
+6 Feb,Friday,Office day. Team sponsored lunch.,560,15bus+350teamLunch+15bus+90snacks+90autoRickshaw,Y,
+7 Feb,Saturday,Gym. Haircut. Grocery run.,680,80gymProtein+300haircut+250groceries+50autoRickshaw,Y,
+8 Feb,Sunday,Visited parents. Had lunch there.,100,60auto+40petrolBike,N,
+9 Feb,Monday,Office day. Normal day.,330,15bus+110lunch+15bus+100snacks+90dinner,Y,
+10 Feb,Tuesday,Office day. Bought stationery.,390,15bus+110lunch+15bus+140stationery+110snacks,Y,
+11 Feb,Wednesday,Work from home. AWS course session.,180,90orderFood+50chai+40fruits,N,
+12 Feb,Thursday,Office day. Evening badminton.,360,15bus+110lunch+15bus+130badmintonCourt+90dinner,Y,
+13 Feb,Friday,Office day. Pre-Valentine grocery shopping.,560,15bus+110lunch+15bus+290groceries+130flowers,Y,
+14 Feb,Saturday,Valentine's Day. Nice dinner outing.,1800,80gymProtein+1400restaurantDinner+320uber,Y,Nice restaurant in Park Street
+15 Feb,Sunday,Rest day. Cooked at home.,80,50vegetables+30eggs,N,
+16 Feb,Monday,Office day. Electricity bill paid.,1990,15bus+110lunch+15bus+1700electricityBill+150snacks,Y,
+17 Feb,Tuesday,Office day. Paid monthly rent.,9500,15bus+110lunch+15bus+9200rent+160groceries,Y,
+18 Feb,Wednesday,Work from home. Debugging marathon.,170,90orderFood+80chai,N,
+19 Feb,Thursday,Office day. Team retrospective.,330,15bus+110lunch+15bus+100snacks+90dinner,Y,
+20 Feb,Friday,Office day. Movie after work.,700,15bus+110lunch+15bus+360movieTicket+200popcornDrinks,Y,
+21 Feb,Saturday,Full rest day. No spending.,0,,N,Zero spend day
+22 Feb,Sunday,Morning walk. Temple visit.,130,80auto+50fruits,N,
+23 Feb,Monday,Office day. Credit card bill paid.,4200,15bus+110lunch+15bus+4000creditCardBill+60chai,Y,
+24 Feb,Tuesday,Office day. Bought new earphones.,1500,15bus+110lunch+15bus+1250earphones+110snacks,Y,Old ones broke
+25 Feb,Wednesday,Work from home. LeetCode practice session.,160,90orderFood+40chai+30fruits,N,
+26 Feb,Thursday,Office day. Invested SIP.,3250,15bus+110lunch+15bus+3000sipInvestment+110snacks,Y,Monthly SIP done
+27 Feb,Friday,Office day. Evening outing with friends.,540,15bus+110lunch+15bus+250dinner+150uber,Y,
+28 Feb,Saturday,Gym. End of month review.,300,80gymProtein+120groceries+100autoRickshaw,Y,February done
+
+,,Total,Rs 29540,Total Count,19,
+
+,,Average Cost Per Day,1055.0,,,
