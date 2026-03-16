@@ -181,36 +181,36 @@ export const ImportSection = () => {
       </div>
       <div className="p-6 md:p-8">
 
-        {/* YEAR SELECTION */}
-        <div className={`mb-6 flex flex-col sm:flex-row items-center justify-center gap-4 p-4 rounded-2xl border transition-all ${
-          fileDetails ? 'bg-muted/30 border-border' : 'bg-primary/5 border-primary/10'
-        }`}>
-          <div className="text-center sm:text-left">
-            <h3 className="text-sm font-bold text-foreground">Target Year</h3>
-            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-              {fileDetails ? 'Updating this will re-assign all entries' : 'Entries will be assigned to this year'}
-            </p>
-          </div>
-          <div className="flex bg-background p-1 rounded-xl shadow-sm border border-border">
-            {[2024, 2025, 2026, 2027].map(year => (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(year.toString())}
-                className={`px-4 py-2 rounded-lg text-sm font-black transition-all ${
-                  selectedYear === year.toString() 
-                    ? 'bg-primary text-primary-foreground shadow-lg scale-105' 
-                    : 'hover:bg-muted text-muted-foreground'
-                }`}
-              >
-                {year}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* STEP 1: UPLOAD */}
         {!fileDetails && (
           <FileUpload onParsed={handleFileParsed} selectedYear={selectedYear} />
+        )}
+
+        {/* YEAR SELECTION - Appears after upload */}
+        {fileDetails && (
+          <div className="mb-6 flex flex-col sm:flex-row items-center justify-center gap-4 p-4 rounded-2xl border transition-all bg-muted/30 border-border animate-in slide-in-from-top duration-500">
+            <div className="text-center sm:text-left">
+              <h3 className="text-sm font-bold text-foreground">Target Year</h3>
+              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                Entries will be assigned to this year
+              </p>
+            </div>
+            <div className="flex bg-background p-1 rounded-xl shadow-sm border border-border">
+              {[2024, 2025, 2026, 2027].map(year => (
+                <button
+                  key={year}
+                  onClick={() => setSelectedYear(year.toString())}
+                  className={`px-4 py-2 rounded-lg text-sm font-black transition-all ${
+                    selectedYear === year.toString() 
+                      ? 'bg-primary text-primary-foreground shadow-lg scale-105' 
+                      : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         {fileDetails && (
