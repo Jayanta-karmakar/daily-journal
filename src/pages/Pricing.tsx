@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, ArrowRight, Sparkles, Globe, ChevronDown } from 'lucide-react';
+import { Check, ArrowRight, Sparkles, Globe, ChevronDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FireCanvas from '@/components/FireCanvas';
 import Logo from '@/components/Logo';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import Footer from '@/components/Footer';
 
 import { currencies } from '@/data/currencies';
 
@@ -25,6 +26,20 @@ const EXCHANGE_RATES: Record<string, number> = {
 const featuredCurrencies = currencies.filter(c =>
   ['USD', 'INR', 'EUR', 'GBP', 'JPY', 'CAD', 'AED', 'AUD', 'SGD'].includes(c.code)
 );
+
+const getFlagEmoji = (countryCode: string) => {
+  if (!countryCode) return '🌐';
+  if (countryCode.toLowerCase() === 'eu') return '🇪🇺';
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  try {
+    return String.fromCodePoint(...codePoints);
+  } catch (e) {
+    return '🌐';
+  }
+};
 
 const plans = [
   {
@@ -144,48 +159,63 @@ export default function Pricing() {
             <div className="relative inline-block mt-4">
               <button
                 onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border hover:border-primary/50 transition-all font-semibold text-sm"
+                className="inline-flex items-center gap-2.5 px-4 py-2 rounded-xl bg-card border border-border hover:border-primary/50 transition-all font-semibold text-sm shadow-sm hover:shadow-md group"
               >
-                <Globe size={16} className="text-muted-foreground" />
-                <span>IN {selectedCurrency.code}</span>
-                <ChevronDown size={14} className={cn("transition-transform", showCurrencyDropdown && "rotate-180")} />
+                <span className="text-base group-hover:scale-110 transition-transform">{getFlagEmoji(selectedCurrency.flag)}</span>
+                <span className="text-muted-foreground font-medium">Currency:</span>
+                <span>{selectedCurrency.code}</span>
+                <ChevronDown size={14} className={cn("transition-transform text-muted-foreground", showCurrencyDropdown && "rotate-180")} />
               </button>
 
               {showCurrencyDropdown && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-card border border-border rounded-xl shadow-xl z-20 py-2 overflow-hidden animate-in fade-in zoom-in duration-200">
-                  <div className="px-3 py-1 border-b border-border mb-1">
-                    <input
-                      type="text"
-                      placeholder="Search currency..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-transparent text-xs focus:outline-none py-1"
-                      onClick={(e) => e.stopPropagation()}
-                    />
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowCurrencyDropdown(false)}
+                  />
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 bg-card border border-border rounded-xl shadow-2xl z-20 py-2 overflow-hidden animate-in fade-in zoom-in duration-200">
+                    <div className="px-3 py-2 border-b border-border mb-1 flex items-center gap-2">
+                      <Search size={14} className="text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Search currency..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-transparent text-xs focus:outline-none py-1"
+                        onClick={(e) => e.stopPropagation()}
+                        autoFocus
+                      />
+                    </div>
+                    <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                      {(searchQuery ? filteredCurrencies : featuredCurrencies).map((curr) => (
+                        <button
+                          key={curr.code}
+                          onClick={() => {
+                            setSelectedCurrency(curr);
+                            setShowCurrencyDropdown(false);
+                            setSearchQuery('');
+                          }}
+                          className={cn(
+                            "w-full text-left px-4 py-2.5 text-sm flex items-center justify-between hover:bg-primary/10 transition-colors",
+                            selectedCurrency.code === curr.code ? "text-primary font-bold bg-primary/5" : "text-foreground"
+                          )}
+                        >
+                          <span className="flex gap-3 items-center">
+                            <span className="text-base w-6 text-center">{getFlagEmoji(curr.flag)}</span>
+                            <span className="font-mono text-[10px] w-8 opacity-60 uppercase">{curr.code}</span>
+                            <span className="truncate max-w-[150px]">{curr.name}</span>
+                          </span>
+                          <span className="text-muted-foreground font-medium">{curr.symbol}</span>
+                        </button>
+                      ))}
+                      {searchQuery && filteredCurrencies.length === 0 && (
+                        <div className="px-4 py-8 text-center text-xs text-muted-foreground">
+                          No currencies found.
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="max-h-64 overflow-y-auto">
-                    {(searchQuery ? filteredCurrencies : featuredCurrencies).map((curr) => (
-                      <button
-                        key={curr.code}
-                        onClick={() => {
-                          setSelectedCurrency(curr);
-                          setShowCurrencyDropdown(false);
-                        }}
-                        className={cn(
-                          "w-full text-left px-4 py-2 text-sm flex items-center justify-between hover:bg-primary/10 transition-colors",
-                          selectedCurrency.code === curr.code ? "text-primary font-bold bg-primary/5" : "text-foreground"
-                        )}
-                      >
-                        <span className="flex gap-2 items-center">
-                          <span className="font-mono text-[10px] w-6 opacity-60">{curr.code}</span>
-                          <span className="truncate max-w-[100px]">{curr.name}</span>
-                        </span>
-                        <span className="text-muted-foreground text-xs">{curr.symbol}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                </div>
+                </>
               )}
             </div>
           </div>
@@ -281,22 +311,7 @@ export default function Pricing() {
         </section>
       </main>
 
-      {/* Simplified Footer for Pricing Page */}
-      <footer className="border-t border-border bg-card py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2 group">
-            <Logo size={24} />
-            <span className="font-black text-foreground uppercase tracking-tight">MyDiary</span>
-          </div>
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-            © {new Date().getFullYear()} MyDiary. All Rights Reserved.
-          </p>
-          <div className="flex gap-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-            <Link to="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
-            <Link to="/terms" className="hover:text-primary transition-colors">Terms</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
