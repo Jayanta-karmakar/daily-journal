@@ -20,14 +20,14 @@ export function validateEntries(entries: ParsedEntry[]): ParsedEntry[] {
         warnings.push(`Expense "${exp.label}" amount is 0`);
       }
       if (exp.amount > 5000) {
-        warnings.push(`Expense "${exp.label}" amount exceeds ₹5000`);
+        warnings.push(`Expense "${exp.label}" amount is unusually high`);
       } else if (
         (exp.amount === 4890 && exp.label.toLowerCase() === 'rent') ||
         (exp.amount === 4650 && exp.label.toLowerCase() === 'pujadueforrent') ||
         (exp.amount === 3000 && exp.label.toLowerCase() === 'suvendudueforbroker') ||
         (exp.amount === 2745 && exp.label.toLowerCase() === 'creditcardbill')
       ) {
-        warnings.push(`Expense "${exp.label}" flagged as high amount (₹${exp.amount})`);
+        warnings.push(`Expense "${exp.label}" flagged as high amount (${exp.amount})`);
       }
       if (exp.type === 'need' || exp.type === 'want') {
         spend += exp.amount;

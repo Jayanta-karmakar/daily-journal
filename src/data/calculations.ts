@@ -1,7 +1,12 @@
 import type { DayEntry, MonthConfig } from './mockData';
 
-export const formatCurrency = (amount: number): string =>
-  `₹${amount.toLocaleString('en-IN')}`;
+export const formatCurrency = (amount: number, currencyCode: string = 'INR'): string => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: currencyCode,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
 
 export const getMonthTotalSpend = (entries: DayEntry[]): number =>
   entries.reduce((s, e) => s + e.totalSpend, 0);

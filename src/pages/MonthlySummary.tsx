@@ -256,7 +256,7 @@ const SummaryPage = () => {
             <DollarSign className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalSalary)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalSalary, config.currency)}</div>
             <p className="text-xs text-muted-foreground mt-1">Based on configuration</p>
           </CardContent>
         </Card>
@@ -266,7 +266,7 @@ const SummaryPage = () => {
             <Wallet className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalSpend)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalSpend, config.currency)}</div>
             <p className="text-xs text-muted-foreground mt-1">{filteredEntries.length} entries recorded</p>
           </CardContent>
         </Card>
@@ -276,7 +276,7 @@ const SummaryPage = () => {
             <TrendingUp className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalInvested)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalInvested, config.currency)}</div>
             <p className="text-xs text-muted-foreground mt-1">Wealth building phase</p>
           </CardContent>
         </Card>
@@ -286,7 +286,7 @@ const SummaryPage = () => {
             <PiggyBank className="h-4 w-4 text-investment" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(remaining)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(remaining, config.currency)}</div>
             <p className="text-xs text-muted-foreground mt-1">Estimated balance</p>
           </CardContent>
         </Card>
@@ -308,7 +308,7 @@ const SummaryPage = () => {
         </div>
         <div className="p-4 bg-card rounded-2xl border border-border/50 shadow-sm flex flex-col justify-center">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Biggest Blowout</p>
-            <p className="text-lg font-bold mt-1 text-foreground">{biggest ? formatCurrency(biggest.amount) : '0'}</p>
+            <p className="text-lg font-bold mt-1 text-foreground">{biggest ? formatCurrency(biggest.amount, config.currency) : formatCurrency(0, config.currency)}</p>
         </div>
       </div>
 
@@ -427,7 +427,7 @@ const SummaryPage = () => {
                                   y={viewBox.cy}
                                   className="fill-foreground text-xl font-bold"
                                 >
-                                  {formatCurrency(totalSpend)}
+                                  {formatCurrency(totalSpend, config.currency)}
                                 </tspan>
                                 <tspan
                                   x={viewBox.cx}
@@ -450,7 +450,7 @@ const SummaryPage = () => {
                       <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.fill }} />
                       <div className="flex flex-col">
                         <span className="text-[10px] font-bold text-muted-foreground uppercase">{item.name}</span>
-                        <span className="text-xs font-bold">{formatCurrency(item.value)}</span>
+                        <span className="text-xs font-bold">{formatCurrency(item.value, config.currency)}</span>
                       </div>
                     </div>
                   ))}
@@ -488,7 +488,7 @@ const SummaryPage = () => {
             </div>
             <div>
                 <p className="text-xs font-bold text-foreground/60 uppercase">Top Transaction</p>
-                <p className="text-sm font-bold">{biggest.label} <span className="text-foreground/70 font-medium">— {formatCurrency(biggest.amount)}</span></p>
+                <p className="text-sm font-bold">{biggest.label} <span className="text-foreground/70 font-medium">— {formatCurrency(biggest.amount, config.currency)}</span></p>
             </div>
           </div>
           <Button variant="ghost" size="sm" className="text-xs font-bold text-primary px-2" onClick={() => navigate('/')}>

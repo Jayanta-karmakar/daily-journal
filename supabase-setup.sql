@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS month_configs (
     salary NUMERIC NOT NULL DEFAULT 0,
     daily_spend_limit NUMERIC NOT NULL DEFAULT 0,
     monthly_budget NUMERIC NOT NULL DEFAULT 0,
+    currency TEXT NOT NULL DEFAULT 'INR',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     UNIQUE(user_id, month)
 );
@@ -69,3 +70,11 @@ CREATE POLICY "Users can update their own expenses" ON expenses FOR UPDATE USING
 CREATE POLICY "Users can delete their own expenses" ON expenses FOR DELETE USING (auth.uid() = user_id);
 
 -- Setup complete!
+
+-- If tables already exist, run this to update:
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'month_configs' AND column_name = 'currency') THEN
+        ALTER TABLE month_configs ADD COLUMN currency TEXT NOT NULL DEFAULT 'INR';
+    END IF;
+END $$;

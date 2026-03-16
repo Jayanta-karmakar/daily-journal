@@ -22,6 +22,7 @@ export interface MonthConfig {
   salary: number;
   dailySpendLimit: number;
   monthlyBudget: number;
+  currency: string;
 }
 
 let uid = 0;
@@ -103,4 +104,5 @@ export const initialMonthConfig: MonthConfig = {
   salary: 45000,
   dailySpendLimit: 600,
   monthlyBudget: 15000,
+  currency: 'INR',
 };
