@@ -408,6 +408,7 @@ export default function Landing() {
               <h4 className="font-black text-foreground uppercase tracking-widest text-xs mb-8">Product</h4>
               <ul className="space-y-4">
                 <li><a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Core Features</a></li>
+                <li><Link to="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Pricing</Link></li>
                 <li><Link to="/register" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Free Tier</Link></li>
                 <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Migration Tools</a></li>
                 <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight">Security Protocol</a></li>
