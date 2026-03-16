@@ -84,11 +84,11 @@ export function SearchModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/50 hover:bg-muted border border-border rounded-md transition-colors w-40 lg:w-64"
+        className="flex items-center justify-center md:justify-start gap-2 p-2 md:px-3 md:py-1.5 text-sm text-muted-foreground bg-muted/50 hover:bg-muted border border-border rounded-md transition-colors w-9 h-9 md:w-40 lg:w-64"
       >
-        <SearchIcon size={14} />
-        <span className="flex-1 text-left">Search...</span>
-        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+        <SearchIcon size={16} className="shrink-0" />
+        <span className="hidden md:inline-flex flex-1 text-left">Search...</span>
+        <kbd className="hidden md:inline-flex pointer-events-none h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
           <span>{isMac ? '⌘' : 'Ctrl'}</span>K
         </kbd>
       </button>
