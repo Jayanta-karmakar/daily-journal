@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { FileUp } from 'lucide-react';
+import JSZip from 'jszip';
+import { FileUp, Download } from 'lucide-react';
 import { FileUpload } from './FileUpload';
 import { ParseSummaryBar } from './ParseSummaryBar';
 import { BulkTypeFixer } from './BulkTypeFixer';
@@ -139,6 +140,45 @@ export const ImportSection = () => {
     toast.success('Process completed!');
   };
 
+  const handleDownloadSample = async () => {
+    const sampleFiles = [
+      'sample_diary.csv',
+      'december_2025.csv',
+      'january_2026.csv',
+      'february_2026.csv'
+    ];
+
+    try {
+      toast.loading('Preparing sample files bundle...', { id: 'zip-download' });
+      const zip = new JSZip();
+      const folder = zip.folder("daily_journal_samples");
+
+      // Fetch all files and add to zip
+      await Promise.all(sampleFiles.map(async (fileName) => {
+        const response = await fetch(`/${fileName}`);
+        if (!response.ok) throw new Error(`Failed to fetch ${fileName}`);
+        const blob = await response.blob();
+        folder?.file(fileName, blob);
+      }));
+
+      // Generate zip and download
+      const content = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(content);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "daily_journal_samples.zip";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success('Samples downloaded as ZIP!', { id: 'zip-download' });
+    } catch (error) {
+      console.error('Error creating zip:', error);
+      toast.error('Failed to bundle samples. Please try again.', { id: 'zip-download' });
+    }
+  };
+
   return (
     <section className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden mt-8 md:mt-12 relative">
       {/* SOFT LOADER OVERLAY */}
@@ -168,7 +208,7 @@ export const ImportSection = () => {
         variant="info"
       />
 
-      <div className="p-5 sm:p-6 border-b border-border bg-muted/10 flex items-center justify-between">
+      <div className="p-5 sm:p-6 border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
            <div className="p-2.5 bg-primary/10 text-primary rounded-xl hidden sm:block">
               <FileUp size={20} />
@@ -178,6 +218,13 @@ export const ImportSection = () => {
              <p className="text-xs sm:text-sm text-foreground/70 mt-0.5">Bring your legacy records exactly into MyDiary format</p>
            </div>
         </div>
+        <button 
+          onClick={handleDownloadSample}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-background border border-border text-foreground/70 hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all text-xs font-bold shadow-sm self-end sm:self-center"
+        >
+          <Download size={14} />
+          Download Sample CSV
+        </button>
       </div>
       <div className="p-6 md:p-8">
 
