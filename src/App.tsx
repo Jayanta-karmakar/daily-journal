@@ -27,6 +27,7 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Admin from "@/pages/Admin";
 import { Analytics } from '@vercel/analytics/react';
+import { APP_ROUTES, HIDE_NAV_PATHS } from "@/config/constants";
 
 const queryClient = new QueryClient();
 
@@ -39,7 +40,7 @@ const AppContent = () => {
   }
   
   const location = useLocation();
-  const isLegalPage = ["/privacy", "/terms", "/contact", "/forgot-password", "/reset-password", "/admin"].includes(location.pathname);
+  const isLegalPage = HIDE_NAV_PATHS.includes(location.pathname);
 
   if (!session) {
     return (
@@ -47,19 +48,19 @@ const AppContent = () => {
         <ScrollToTop />
         <OfflineBanner />
         <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path={APP_ROUTES.HOME} element={<Landing />} />
+          <Route path={APP_ROUTES.LOGIN} element={<Login />} />
+          <Route path={APP_ROUTES.REGISTER} element={<Register />} />
+          <Route path={APP_ROUTES.PRICING} element={<Pricing />} />
+          <Route path={APP_ROUTES.CONTACT} element={<Contact />} />
+          <Route path={APP_ROUTES.PRIVACY} element={<PrivacyPolicy />} />
 
 
-          <Route path="/terms" element={<TermsOfService />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/admin" element={<Navigate to="/login" />} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path={APP_ROUTES.TERMS} element={<TermsOfService />} />
+          <Route path={APP_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
+          <Route path={APP_ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
+          <Route path={APP_ROUTES.ADMIN} element={<Navigate to={APP_ROUTES.LOGIN} />} />
+          <Route path="*" element={<Navigate to={APP_ROUTES.HOME} />} />
         </Routes>
       </>
     );
@@ -71,22 +72,22 @@ const AppContent = () => {
       <OfflineBanner />
       {!isLegalPage && <TopNav />}
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/new" element={<NewEntry />} />
-        <Route path="/entry/:date" element={<ViewEntry />} />
-        <Route path="/entry/:date/edit" element={<EditEntry />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/month-summary" element={<MonthlySummary />} />
-        <Route path="/login" element={<Navigate to="/" />} />
-        <Route path="/register" element={<Navigate to="/" />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path={APP_ROUTES.DASHBOARD} element={<Dashboard />} />
+        <Route path={APP_ROUTES.NEW_ENTRY} element={<NewEntry />} />
+        <Route path={APP_ROUTES.VIEW_ENTRY} element={<ViewEntry />} />
+        <Route path={APP_ROUTES.EDIT_ENTRY} element={<EditEntry />} />
+        <Route path={APP_ROUTES.SETTINGS} element={<SettingsPage />} />
+        <Route path={APP_ROUTES.SUMMARY} element={<MonthlySummary />} />
+        <Route path={APP_ROUTES.LOGIN} element={<Navigate to={APP_ROUTES.HOME} />} />
+        <Route path={APP_ROUTES.REGISTER} element={<Navigate to={APP_ROUTES.HOME} />} />
+        <Route path={APP_ROUTES.PRICING} element={<Pricing />} />
+        <Route path={APP_ROUTES.CONTACT} element={<Contact />} />
+        <Route path={APP_ROUTES.PRIVACY} element={<PrivacyPolicy />} />
+        <Route path={APP_ROUTES.ADMIN} element={<Admin />} />
 
-        <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path={APP_ROUTES.TERMS} element={<TermsOfService />} />
+        <Route path={APP_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
+        <Route path={APP_ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!isLegalPage && <BottomNav />}

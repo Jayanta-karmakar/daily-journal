@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS public.pricing_plans (
     currency TEXT NOT NULL DEFAULT 'INR',
     features JSONB NOT NULL DEFAULT '[]'::jsonb,
     is_active BOOLEAN NOT NULL DEFAULT true,
+    is_popular BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

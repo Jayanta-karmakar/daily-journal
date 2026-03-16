@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import { Link } from 'react-router-dom';
 import { Check, ArrowRight, Sparkles, Globe, ChevronDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -42,7 +43,7 @@ const getFlagEmoji = (countryCode: string) => {
   }
 };
 
-const plans = [
+const plans = [ // keep this for now
   {
     name: 'Free Plan',
     description: 'A lightweight way to try MyDiary. No cost, no card, no hassle.',
@@ -102,19 +103,53 @@ const plans = [
   // },
 ];
 
+interface PricingPlan {
+  id: string;
+  name: string;
+  description: string;
+  price_monthly: number;
+  price_yearly: number;
+  currency: string;
+  features: string[];
+  is_active: boolean;
+  is_popular: boolean;
+}
+
 export default function Pricing() {
+  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [selectedCurrency, setSelectedCurrency] = useState(featuredCurrencies.find(c => c.code === 'INR') || featuredCurrencies[0]);
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    const { data, error } = await supabase
+      .from('pricing_plans')
+      .select('*')
+      .eq('is_active', true)
+      .order('price_monthly', { ascending: true });
+
+    if (!error && data) {
+      setPlans(data as PricingPlan[]);
+    }
+    setLoading(false);
+  };
+
   const formatPrice = (price: number) => {
     if (price === 0) return '0';
+    // The price in DB is assumed to be in the plan's default currency (usually INR or USD)
+    // For this demo, we'll treat the DB price as USD for conversion logic
     const rate = EXCHANGE_RATES[selectedCurrency.code] || 1;
     const converted = price * rate;
     if (converted >= 1000) {
       return (converted / 1000).toFixed(1) + 'k';
     }
-    return Math.round(converted).toString();
+    return Math.round(converted).toLocaleString();
   };
 
   const filteredCurrencies = currencies.filter(c =>
@@ -202,89 +237,113 @@ export default function Pricing() {
                 </>
               )}
             </div>
+
+            {/* Billing Cycle Toggle */}
+            <div className="flex items-center justify-center gap-4 mt-8">
+              <span className={cn("text-sm font-bold", billingCycle === 'monthly' ? "text-foreground" : "text-muted-foreground")}>Monthly</span>
+              <button
+                onClick={() => setBillingCycle(prev => prev === 'monthly' ? 'yearly' : 'monthly')}
+                className="relative w-14 h-7 rounded-full bg-muted border border-border p-1 transition-colors hover:border-primary/50"
+              >
+                <div className={cn(
+                  "absolute top-1 left-1 w-5 h-5 rounded-full bg-primary transition-all duration-300 shadow-sm",
+                  billingCycle === 'yearly' && "translate-x-7"
+                )} />
+              </button>
+              <div className="flex items-center gap-2">
+                <span className={cn("text-sm font-bold", billingCycle === 'yearly' ? "text-foreground" : "text-muted-foreground")}>Yearly</span>
+                <span className="px-2 py-0.5 rounded-md bg-success/10 text-success text-[10px] font-black uppercase tracking-wider">Save 20%</span>
+              </div>
+            </div>
           </div>
 
-          {/* Pricing Grid */}
-          <div className={cn(
-            "grid gap-6 items-stretch mx-auto",
-            plans.length === 1 && "max-w-md grid-cols-1",
-            plans.length === 2 && "max-w-4xl grid-cols-1 md:grid-cols-2",
-            plans.length === 3 && "max-w-6xl grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
-            plans.length >= 4 && "max-w-7xl grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-          )}>
-            {plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={cn(
-                  "relative flex flex-col p-8 rounded-[2rem] border transition-all duration-300 group overflow-hidden h-96",
-                  plan.popular
-                    ? "bg-white text-slate-900 border-primary shadow-2xl scale-[1.02] z-10 border-2"
-                    : "bg-card text-foreground border-border hover:border-primary/50 shadow-sm"
-                )}
-              >
-                {/* Fire Background for Popular Plan */}
-                {plan.popular && (
-                  // <div className="absolute inset-x-0 bottom-0 h-[65%] z-0 pointer-events-none opacity-90">
-                  <div className="absolute inset-x-0 bottom-0 h-[40%] z-0 pointer-events-none opacity-90">
-                    <FireCanvas className="w-full h-full" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/50 to-white"></div>
-                  </div>
-                )}
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <div className={cn(
+              "grid gap-6 items-stretch mx-auto",
+              plans.length === 1 && "max-w-md grid-cols-1",
+              plans.length === 2 && "max-w-4xl grid-cols-1 md:grid-cols-2",
+              plans.length === 3 && "max-w-6xl grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+              plans.length >= 4 && "max-w-7xl grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+            )}>
+              {plans.map((plan) => (
+                <div
+                  key={plan.id}
+                  className={cn(
+                    "relative flex flex-col p-8 rounded-[2rem] border transition-all duration-300 group overflow-hidden min-h-[500px]",
+                    plan.is_popular
+                      ? "bg-white text-slate-900 border-primary shadow-2xl scale-[1.02] z-10 border-2"
+                      : "bg-card text-foreground border-border hover:border-primary/50 shadow-sm"
+                  )}
+                >
+                  {/* Fire Background for Popular Plan */}
+                  {plan.is_popular && (
+                    <div className="absolute inset-x-0 bottom-0 h-[40%] z-0 pointer-events-none opacity-90">
+                      <FireCanvas className="w-full h-full" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/50 to-white"></div>
+                    </div>
+                  )}
 
 
-                <div className="relative z-10 flex flex-col h-full">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="font-bold text-xl">{plan.name}</h3>
-                    {plan.popular && (
-                      <span className="px-3 py-1 rounded-full bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/20">
-                        Most popular
-                      </span>
-                    )}
-                  </div>
-
-                  <p className={cn("text-xs mb-8 leading-relaxed", plan.popular ? "text-slate-500" : "text-muted-foreground")}>
-                    {plan.description}
-                  </p>
-
-                  <div className="mb-8 flex items-baseline gap-1">
-                    <span className="text-4xl font-black">{selectedCurrency.symbol}{formatPrice(plan.price)}</span>
-                    <span className={cn("text-[10px] font-bold uppercase tracking-widest", plan.popular ? "text-slate-400" : "text-muted-foreground")}>
-                      {plan.price === 0 ? 'one-time' : '/ monthly'}
-                    </span>
-                  </div>
-
-                  <Link
-                    to={plan.price === 0 ? "/register" : "#"}
-                    className={cn(
-                      "w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 mb-8",
-                      plan.popular
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                        : "bg-muted text-foreground hover:bg-primary hover:text-primary-foreground"
-                    )}
-                  >
-                    {plan.buttonText}
-                    <ArrowRight size={16} />
-                  </Link>
-
-                  <div className="flex flex-col gap-4 mt-auto">
-                    {plan.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
-                        <div className={cn(
-                          "w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5",
-                          "bg-primary/10 text-primary"
-                        )}>
-                          <Check size={12} strokeWidth={3} />
-                        </div>
-                        <span className={cn("text-xs font-medium", plan.popular ? "text-slate-600" : "text-muted-foreground")}>
-                          {feature}
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="font-bold text-xl">{plan.name}</h3>
+                      {plan.is_popular && (
+                        <span className="px-3 py-1 rounded-full bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/20">
+                          Most popular
                         </span>
-                      </div>
-                    ))}
+                      )}
+                    </div>
+
+                    <p className={cn("text-xs mb-8 leading-relaxed", plan.is_popular ? "text-slate-500" : "text-muted-foreground")}>
+                      {plan.description}
+                    </p>
+
+                    <div className="mb-8 flex items-baseline gap-1">
+                      <span className="text-4xl font-black">
+                        {selectedCurrency.symbol}{formatPrice(billingCycle === 'monthly' ? plan.price_monthly : plan.price_yearly)}
+                      </span>
+                      <span className={cn("text-[10px] font-bold uppercase tracking-widest", plan.is_popular ? "text-slate-400" : "text-muted-foreground")}>
+                        {plan.price_monthly === 0 ? 'one-time' : `/ ${billingCycle}`}
+                      </span>
+                    </div>
+
+                    <Link
+                      to={plan.price_monthly === 0 ? "/register" : "#"}
+                      className={cn(
+                        "w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 mb-8",
+                        plan.is_popular
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                          : "bg-muted text-foreground hover:bg-primary hover:text-primary-foreground"
+                      )}
+                    >
+                      {plan.price_monthly === 0 ? 'Get Started' : 'Coming Soon'}
+                      <ArrowRight size={16} />
+                    </Link>
+
+                    <div className="flex flex-col gap-4 mt-auto">
+                      {Array.isArray(plan.features) && plan.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-start gap-3 animate-in fade-in slide-in-from-left-2" style={{ animationDelay: `${idx * 100}ms` }}>
+                          <div className={cn(
+                            "w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5",
+                            "bg-primary/10 text-primary"
+                          )}>
+                            <Check size={12} strokeWidth={3} />
+                          </div>
+                          <span className={cn("text-xs font-medium", plan.is_popular ? "text-slate-600" : "text-muted-foreground")}>
+                            {feature}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Bottom Pitch */}
           <div className="mt-32">

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAppContext } from '@/context/AppContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { APP_ROUTES, AUTH_ROLES } from '@/config/constants';
 
 interface Profile {
   id: string;
@@ -24,6 +25,7 @@ interface PricingPlan {
   currency: string;
   features: string[];
   is_active: boolean;
+  is_popular: boolean;
 }
 
 export default function Admin() {
@@ -49,21 +51,19 @@ export default function Admin() {
   const checkAdmin = async () => {
     if (!session || !session.user || !session.user.id) {
       setLoading(false);
-      navigate('/login');
+      navigate(APP_ROUTES.LOGIN);
       return;
     }
     try {
-      console.log('🔴 Debug - Session :', session);
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', session.user.id)
         .single();
-      console.log('🔴 Debug - Table Response:', { data, error });
-      if (error || !data || data.role !== 'admin') {
+      if (error || !data || data.role !== AUTH_ROLES.ADMIN) {
         toast.error('Access denied. Administrator privileges required.');
         setLoading(false);
-        navigate('/');
+        navigate(APP_ROUTES.HOME);
         return;
       }
       setIsAdmin(true);
@@ -72,7 +72,7 @@ export default function Admin() {
     } catch (err) {
       toast.error('Failed to verify admin status.');
       setLoading(false);
-      navigate('/');
+      navigate(APP_ROUTES.HOME);
     } finally {
       setLoading(false);
     }
@@ -250,7 +250,7 @@ export default function Admin() {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex justify-end">
               <button
-                onClick={() => setEditingPlan({ id: 'new', name: '', description: '', price_monthly: 0, price_yearly: 0, currency: 'INR', features: [], is_active: true })}
+                onClick={() => setEditingPlan({ id: 'new', name: '', description: '', price_monthly: 0, price_yearly: 0, currency: 'INR', features: [], is_active: true, is_popular: false })}
                 className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
               >
                 + Create New Plan
@@ -352,15 +352,27 @@ export default function Admin() {
                       />
                     </label>
 
-                    <div className="flex items-center gap-3 py-2">
-                      <input
-                        type="checkbox"
-                        id="isActive"
-                        checked={editingPlan.is_active}
-                        onChange={(e) => setEditingPlan({ ...editingPlan, is_active: e.target.checked })}
-                        className="w-5 h-5 rounded text-primary focus:ring-primary border-border bg-background"
-                      />
-                      <label htmlFor="isActive" className="font-bold text-sm">Active (Visible to users)</label>
+                    <div className="flex items-center gap-6 py-2">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          id="isActive"
+                          checked={editingPlan.is_active}
+                          onChange={(e) => setEditingPlan({ ...editingPlan, is_active: e.target.checked })}
+                          className="w-5 h-5 rounded text-primary focus:ring-primary border-border bg-background"
+                        />
+                        <label htmlFor="isActive" className="font-bold text-sm">Active</label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          id="isPopular"
+                          checked={editingPlan.is_popular}
+                          onChange={(e) => setEditingPlan({ ...editingPlan, is_popular: e.target.checked })}
+                          className="w-5 h-5 rounded text-primary focus:ring-primary border-border bg-background"
+                        />
+                        <label htmlFor="isPopular" className="font-bold text-sm">Popular Plan</label>
+                      </div>
                     </div>
 
                     <div className="flex gap-4 pt-4 mt-6 border-t border-border">

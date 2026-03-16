@@ -23,6 +23,10 @@ interface AppContextType {
   updateEntry: (entry: DayEntry) => void;
   getEntryByDate: (date: string) => DayEntry | undefined;
   session: any;
+  profile: {
+    role: string;
+    is_banned: boolean;
+  } | null;
   loading: boolean;
   logout: () => void;
   deleteEntry: (date: string) => Promise<void>;
@@ -38,6 +42,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<any>(null);
+  const [profile, setProfile] = useState<{ role: string, is_banned: boolean } | null>(null);
   const [entries, setEntries] = useState<DayEntry[]>([]);
   const [config, setConfigState] = useState<MonthConfig>(initialMonthConfig);
   const [loading, setLoading] = useState(true);
@@ -48,14 +53,35 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    const handleAuthChange = async (currSession: any) => {
+      setSession(currSession);
+      if (currSession?.user?.id) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role, is_banned')
+          .eq('id', currSession.user.id)
+          .single();
+        
+        if (data && !error) {
+          if (data.is_banned) {
+            toast.error('Your account has been banned. Please contact support.');
+            await logout();
+            return;
+          }
+          setProfile(data);
+        }
+      } else {
+        setProfile(null);
+      }
       setIsInitialized(true);
+    };
+
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      handleAuthChange(initialSession);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setIsInitialized(true);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      handleAuthChange(newSession);
     });
 
     return () => subscription.unsubscribe();
@@ -418,7 +444,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AppContext.Provider value={{ 
       entries, config, setConfig, addEntry, updateEntry, 
-      getEntryByDate, session, loading, logout, deleteEntry, 
+      getEntryByDate, session, profile, loading, logout, deleteEntry, 
       deleteAllEntries, isOnline, isSyncing, refreshEntries: fetchEntries,
       deleteMonthEntries, deleteYearEntries
     }}>

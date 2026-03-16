@@ -4,6 +4,7 @@ import { Menu, X, Sparkles, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Logo from './Logo';
 import { ThemeToggle } from './ThemeToggle';
+import { APP_ROUTES } from '@/config/constants';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +36,7 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-full flex items-center justify-between">
         {/* Brand */}
-        <Link to="/" className="flex items-center gap-2 group shrink-0">
+        <Link to={APP_ROUTES.HOME} className="flex items-center gap-2 group shrink-0">
           <Logo size={scrolled ? 30 : 34} className="transition-transform duration-200 group-hover:scale-110" />
           <span className={cn(
             "font-bold tracking-tight bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent transition-all duration-300",
@@ -69,13 +70,13 @@ export default function Navbar() {
 
           <div className="hidden sm:flex items-center gap-4">
             <Link
-              to="/login"
+              to={APP_ROUTES.LOGIN}
               className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
               Log in
             </Link>
             <Link
-              to="/register"
+              to={APP_ROUTES.REGISTER}
               className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm flex items-center gap-2 group"
             >
               Get Started
@@ -117,14 +118,14 @@ export default function Navbar() {
             <hr className="border-border" />
             <div className="flex flex-col gap-4">
               <Link
-                to="/login"
+                to={APP_ROUTES.LOGIN}
                 className="text-lg font-bold text-foreground"
                 onClick={() => setIsOpen(false)}
               >
                 Log in
               </Link>
               <Link
-                to="/register"
+                to={APP_ROUTES.REGISTER}
                 className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-center font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
                 onClick={() => setIsOpen(false)}
               >
