@@ -2,16 +2,16 @@ import { useEffect, useRef } from 'react';
 
 const COLS = 80;
 const ROWS = 28;
-const TARGET_FPS = 30;
+const TARGET_FPS = 24;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
 function charFrom(h: number): string | null {
-  if (h > 0.85) return '@';
-  if (h > 0.70) return '#';
+  // if (h > 0.85) return '@';
+  // if (h > 0.70) return '#';
   if (h > 0.55) return 'x';
   if (h > 0.40) return '*';
   if (h > 0.26) return '+';
-  if (h > 0.13) return '.';
+  if (h > 0.13) return ':';
   return null;
 }
 
@@ -108,8 +108,8 @@ export default function FireCanvas({ className }: FireCanvasProps) {
           if (!ch) continue;
 
           let r: number, g: number, b: number;
-          if (h > 0.90) { r = 255; g = 240; b = 120; } // hot white-yellow core
-          else if (h > 0.78) { r = 255; g = 160; b = 0; } // orange
+          // if (h > 0.90) { r = 255; g = 240; b = 120; } // hot white-yellow core // to normal
+          if (h > 0.78) { r = 255; g = 160; b = 0; } // orange
           else if (h > 0.62) { r = 255; g = 80; b = 0; } // deep orange
           else if (h > 0.45) { r = 220; g = 30; b = 0; } // red-orange
           else if (h > 0.28) { r = 180; g = 10; b = 0; } // red
