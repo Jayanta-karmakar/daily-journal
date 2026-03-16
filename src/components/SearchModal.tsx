@@ -43,10 +43,15 @@ export function SearchModal() {
   const navigate = useNavigate();
 
   const filteredEntries = useMemo(() => {
-    if (!search.trim()) return entries;
+    // Deduplicate by date to prevent duplicate items
+    const uniqueEntries = Array.from(
+      new Map(entries.map((entry) => [entry.date, entry])).values()
+    ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    if (!search.trim()) return uniqueEntries;
     const lowerSearch = search.toLowerCase();
     
-    return entries.filter((entry) => {
+    return uniqueEntries.filter((entry) => {
       const formattedDate = format(new Date(entry.date), 'dd MMM yyyy');
       const expenseLabels = entry.expenses.map(e => e.label).join(' ');
       const searchableValue = `${formattedDate} ${entry.day} ${entry.gymAttended === 'yes' ? 'GYM' : ''} ${entry.journalText} ${entry.notes || ''} ${expenseLabels}`;
