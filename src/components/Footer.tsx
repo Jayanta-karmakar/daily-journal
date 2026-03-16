@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Github, Twitter, Mail } from 'lucide-react';
 import Logo from './Logo';
+import { APP_INFO, DEVELOPER_INFO } from '@/config/constants';
 
 export default function Footer() {
   return (
@@ -11,19 +12,19 @@ export default function Footer() {
           <div className="space-y-8">
             <div className="flex items-center gap-2 group">
               <Logo size={32} className="transition-transform duration-200 group-hover:scale-110" />
-              <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent uppercase">MyDiary</span>
+              <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent uppercase">{APP_INFO.name}</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px]">
-              The complete daily journal and budget ledger designed for individuals who value privacy and progress above all else.
+              {APP_INFO.description}
             </p>
             <div className="flex gap-4">
               <a href="#" className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
                 <Twitter size={18} />
               </a>
-              <a href="#" className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
+              <a href={DEVELOPER_INFO.github} className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
                 <Github size={18} />
               </a>
-              <a href="#" className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
+              <a href={`mailto:${APP_INFO.contactEmail}`} className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
                 <Mail size={18} />
               </a>
             </div>

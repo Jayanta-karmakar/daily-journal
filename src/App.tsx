@@ -25,6 +25,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
+import Admin from "@/pages/Admin";
 import { Analytics } from '@vercel/analytics/react';
 
 const queryClient = new QueryClient();
@@ -38,7 +39,7 @@ const AppContent = () => {
   }
   
   const location = useLocation();
-  const isLegalPage = ["/privacy", "/terms", "/contact", "/forgot-password", "/reset-password"].includes(location.pathname);
+  const isLegalPage = ["/privacy", "/terms", "/contact", "/forgot-password", "/reset-password", "/admin"].includes(location.pathname);
 
   if (!session) {
     return (
@@ -57,6 +58,7 @@ const AppContent = () => {
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/admin" element={<Navigate to="/login" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </>
@@ -80,7 +82,7 @@ const AppContent = () => {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-
+        <Route path="/admin" element={<Admin />} />
 
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -3,17 +3,10 @@ import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { DEVELOPER_INFO } from '@/config/constants';
 
 const Contact = () => {
-  const developer = {
-    name: "Jayanta Karmakar",
-    role: "Full Stack Developer & UI/UX Designer",
-    location: "India (Available Remotely Worldwide)",
-    email: "jayantakarmakar998@gmail.com",
-    website: "http://codebyjayanta.in/",
-    github: "https://github.com/jayanta-karmakar",
-    linkedin: "https://www.linkedin.com/in/jayanta-karmakar-496641140/",
-  };
+  const developer = DEVELOPER_INFO;
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground">

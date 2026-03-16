@@ -45,13 +45,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const isOnline = useOnlineStatus();
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setIsInitialized(true);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setIsInitialized(true);
     });
 
     return () => subscription.unsubscribe();
@@ -59,6 +63,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   // Offline-first initial load
   useEffect(() => {
+    if (!isInitialized) return; // Wait until initial session check completes
+
     const loadOfflineData = async () => {
       const offlineEntries = await getOfflineEntries();
       if (offlineEntries.length > 0) {
@@ -87,7 +93,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setEntries([]);
       setLoading(false);
     }
-  }, [session, isOnline]);
+  }, [session, isOnline, isInitialized]);
 
   // Sync when online
   useEffect(() => {
