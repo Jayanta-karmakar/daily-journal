@@ -3,6 +3,8 @@ import { Home, PenSquare, BarChart3, Settings, User } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useAppContext } from '@/context/AppContext';
 import Logo from './Logo';
+import { SearchModal } from './SearchModal';
+
 
 const TopNav = () => {
   const { session, isOnline, isSyncing } = useAppContext();
@@ -35,6 +37,7 @@ const TopNav = () => {
         </NavLink>
       </div>
       <div className="ml-auto flex items-center gap-3">
+        <SearchModal />
         {session && (
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full border border-border">
             <User size={14} className="text-muted-foreground" />
