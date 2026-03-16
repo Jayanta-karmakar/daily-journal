@@ -55,7 +55,7 @@ const monthMap: Record<string, string> = {
   sep: '09', oct: '10', nov: '11', dec: '12'
 };
 
-export function parseCSV(rawCSV: string): ParsedEntry[] {
+export function parseCSV(rawCSV: string, year: string): ParsedEntry[] {
   const rows = parseCSVQuotes(rawCSV);
   const parsedEntries: ParsedEntry[] = [];
 
@@ -87,7 +87,7 @@ export function parseCSV(rawCSV: string): ParsedEntry[] {
     if (!mNum) {
       errFlags.push(`Date could not be parsed: ${dateCol}`);
     }
-    const parsedDate = `2026-${mNum || '01'}-${dRaw.padStart(2, '0')}`;
+    const parsedDate = `${year}-${mNum || '01'}-${dRaw.padStart(2, '0')}`;
 
     for (const chunk of chunkStrings) {
       const trimmed = chunk.trim();

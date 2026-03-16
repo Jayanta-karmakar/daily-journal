@@ -4,10 +4,11 @@ import { ParsedEntry } from './types';
 import { parseCSV } from './parseCSV';
 
 interface FileUploadProps {
-  onParsed: (entries: ParsedEntry[], filename: string, size: number, skippedCount: number) => void;
+  onParsed: (entries: ParsedEntry[], filename: string, size: number, skippedCount: number, rawContent: string) => void;
+  selectedYear: string;
 }
 
-export const FileUpload: React.FC<FileUploadProps> = ({ onParsed }) => {
+export const FileUpload: React.FC<FileUploadProps> = ({ onParsed, selectedYear }) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -18,9 +19,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onParsed }) => {
     }
     const text = await file.text();
     const rowsCount = text.split('\n').filter(r => r.trim()).length - 1; // -1 for header
-    const entries = parseCSV(text);
+    const entries = parseCSV(text, selectedYear);
     const skipped = Math.max(0, rowsCount - entries.length);
-    onParsed(entries, file.name, file.size, skipped);
+    onParsed(entries, file.name, file.size, skipped, text);
   };
 
   const onDragOver = (e: React.DragEvent) => {

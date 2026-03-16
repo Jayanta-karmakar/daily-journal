@@ -8,6 +8,7 @@ import { ImportConfirmBar, DuplicateAction } from './ImportConfirmBar';
 import { ParsedEntry } from './types';
 import { validateEntries } from './validateEntries';
 import { useAppContext } from '@/context/AppContext';
+import { parseCSV } from './parseCSV';
 import { DayEntry } from '@/data/mockData';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../ConfirmModal';
@@ -18,7 +19,8 @@ type FilterTab = 'all' | 'ready' | 'warning' | 'error';
 export const ImportSection = () => {
   const { entries, addEntry, updateEntry, refreshEntries } = useAppContext();
   
-  const [fileDetails, setFileDetails] = useState<{ name: string; size: number } | null>(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [fileDetails, setFileDetails] = useState<{ name: string; size: number; content: string } | null>(null);
   const [parsedEntries, setParsedEntries] = useState<ParsedEntry[]>([]);
   const [skippedCount, setSkippedCount] = useState(0);
   
@@ -27,19 +29,28 @@ export const ImportSection = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [importSummary, setImportSummary] = useState({ added: 0, skipped: 0 });
 
-  const handleFileParsed = (entries: ParsedEntry[], filename: string, size: number, skipped: number) => {
+  const handleFileParsed = (entries: ParsedEntry[], filename: string, size: number, skipped: number, rawContent: string) => {
     setParsedEntries(entries);
-    setFileDetails({ name: filename, size });
+    setFileDetails({ name: filename, size, content: rawContent });
     setSkippedCount(skipped);
     setImportSummary({ added: 0, skipped: 0 });
     setShowSuccessModal(false);
   };
+
+  // Re-parse if year changes after upload
+  React.useEffect(() => {
+    if (fileDetails?.content) {
+      const entries = parseCSV(fileDetails.content, selectedYear);
+      setParsedEntries(entries);
+    }
+  }, [selectedYear, fileDetails?.content]);
 
   const resetState = () => {
     setFileDetails(null);
     setParsedEntries([]);
     setSkippedCount(0);
     setFilter('all');
+    // We keep selectedYear as it is likely the user wants the same year for next file
   };
 
   const handleApplyBulkType = (keyword: string, type: 'need' | 'want' | 'investment' | 'savings') => {
@@ -170,9 +181,36 @@ export const ImportSection = () => {
       </div>
       <div className="p-6 md:p-8">
 
+        {/* YEAR SELECTION */}
+        <div className={`mb-6 flex flex-col sm:flex-row items-center justify-center gap-4 p-4 rounded-2xl border transition-all ${
+          fileDetails ? 'bg-muted/30 border-border' : 'bg-primary/5 border-primary/10'
+        }`}>
+          <div className="text-center sm:text-left">
+            <h3 className="text-sm font-bold text-foreground">Target Year</h3>
+            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+              {fileDetails ? 'Updating this will re-assign all entries' : 'Entries will be assigned to this year'}
+            </p>
+          </div>
+          <div className="flex bg-background p-1 rounded-xl shadow-sm border border-border">
+            {[2024, 2025, 2026, 2027].map(year => (
+              <button
+                key={year}
+                onClick={() => setSelectedYear(year.toString())}
+                className={`px-4 py-2 rounded-lg text-sm font-black transition-all ${
+                  selectedYear === year.toString() 
+                    ? 'bg-primary text-primary-foreground shadow-lg scale-105' 
+                    : 'hover:bg-muted text-muted-foreground'
+                }`}
+              >
+                {year}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* STEP 1: UPLOAD */}
         {!fileDetails && (
-          <FileUpload onParsed={handleFileParsed} />
+          <FileUpload onParsed={handleFileParsed} selectedYear={selectedYear} />
         )}
 
         {fileDetails && (
