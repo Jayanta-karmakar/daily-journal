@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { DEFAULTS } from '@/config/constants';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -24,10 +25,10 @@ const SettingsPage = () => {
   const [salary, setSalary] = useState(config.salary.toString());
   const [limit, setLimit] = useState(config.dailySpendLimit.toString());
   const [budget, setBudget] = useState(config.monthlyBudget.toString());
-  const [currency, setCurrency] = useState(config.currency || 'INR');
+  const [currency, setCurrency] = useState(config.currency || DEFAULTS.CURRENCY);
   
   const currentCurrency = useMemo(() => 
-    currencies.find(c => c.code === currency) || currencies.find(c => c.code === 'INR')!
+    currencies.find(c => c.code === currency) || currencies.find(c => c.code === DEFAULTS.CURRENCY)!
   , [currency]);
   
   const [showClearAllModal, setShowClearAllModal] = useState(false);

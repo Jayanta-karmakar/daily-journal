@@ -1,5 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { DayEntry, MonthConfig } from '@/data/mockData';
+import { DATABASE } from '@/config/constants';
 
 interface JournalDB extends DBSchema {
   entries: {
@@ -24,14 +25,11 @@ export type SyncOperation = {
   timestamp: number;
 };
 
-const DB_NAME = 'MyDiaryDB';
-const DB_VERSION = 1;
-
 let dbPromise: Promise<IDBPDatabase<JournalDB>>;
 
 export const getDB = () => {
   if (!dbPromise) {
-    dbPromise = openDB<JournalDB>(DB_NAME, DB_VERSION, {
+    dbPromise = openDB<JournalDB>(DATABASE.IDB_NAME, DATABASE.IDB_VERSION, {
       upgrade(db) {
         if (!db.objectStoreNames.contains('entries')) {
           db.createObjectStore('entries', { keyPath: 'date' });
