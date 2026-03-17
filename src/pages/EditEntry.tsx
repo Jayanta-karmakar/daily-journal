@@ -7,6 +7,7 @@ import type { Expense, DayEntry } from '@/data/mockData';
 import GymToggle from '@/components/GymToggle';
 import ExpenseRow from '@/components/ExpenseRow';
 import { toast } from 'sonner';
+import SEO from '@/components/SEO';
 
 interface ExpenseForm {
   amount: string;
@@ -97,6 +98,10 @@ const EditEntry = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-6">
+      <SEO 
+        title="Edit Entry" 
+        robots="noindex, nofollow"
+      />
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate(-1)} className="px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
           <ArrowLeft size={16} className="inline mr-1" /> Back

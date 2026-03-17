@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import Logo from '@/components/Logo';
 import { OAuthButtons } from '@/components/OAuthButtons';
+import SEO from '@/components/SEO';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -27,6 +28,11 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+      <SEO 
+        title="Sign In" 
+        description="Access your private diary and budget tracker. Securely sign in to MyDiary."
+        canonical="https://journal.codebyjayanta.in/login"
+      />
       {/* Decorative Blob */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] pointer-events-none"></div>
 

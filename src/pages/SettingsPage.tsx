@@ -16,6 +16,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { DEFAULTS } from '@/config/constants';
+import SEO from '@/components/SEO';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -130,6 +131,10 @@ const SettingsPage = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 md:px-8 py-8 pb-24 md:pb-12 space-y-8">
+      <SEO 
+        title="Settings" 
+        robots="noindex, nofollow"
+      />
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import FireCanvas from '@/components/FireCanvas';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 import { currencies } from '@/data/currencies';
 import { PRICING, DATABASE, DEFAULTS } from '@/config/constants';
@@ -86,6 +87,11 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-primary/20">
+      <SEO 
+        title="Pricing & Plans" 
+        description="Choose the right plan for your journey. Secure, private journal and budget tracking with multi-currency support."
+        canonical="https://journal.codebyjayanta.in/pricing"
+      />
       <Navbar />
 
       <main className="flex-1 pt-32 pb-24">

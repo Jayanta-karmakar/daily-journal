@@ -2,10 +2,16 @@ import { Link } from 'react-router-dom';
 import { FileText, Scale, AlertCircle, Ban, HeartHandshake, ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-background font-sans selection:bg-primary/20">
+      <SEO 
+        title="Terms of Service" 
+        description="Read the terms and conditions for using MyDiary, your secure personal ledger and budget tracker."
+        canonical="https://journal.codebyjayanta.in/terms"
+      />
       <Navbar />
 
       <main className="pt-32 pb-24 px-4 sm:px-8 max-w-4xl mx-auto">
