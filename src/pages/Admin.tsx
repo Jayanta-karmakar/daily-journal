@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAppContext } from '@/context/AppContext';
 import TopNav from '@/components/TopNav';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 import { APP_ROUTES, AUTH_ROLES } from '@/config/constants';
 
 interface Profile {
@@ -139,6 +140,10 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-primary/20">
+      <SEO 
+        title="Admin Control Center" 
+        robots="noindex, nofollow"
+      />
       <TopNav />
 
       <main className="flex-1 pt-24 pb-16 max-w-7xl mx-auto w-full px-4 sm:px-8">

@@ -27,7 +27,7 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Admin from "@/pages/Admin";
 import { Analytics } from '@vercel/analytics/react';
-import { APP_ROUTES, HIDE_NAV_PATHS } from "@/config/constants";
+import { APP_ROUTES, HIDE_NAV_PATHS, STORAGE_KEYS } from "@/config/constants";
 
 const queryClient = new QueryClient();
 
@@ -97,7 +97,7 @@ const AppContent = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="daily-journal-theme-v2">
+    <ThemeProvider defaultTheme="light" storageKey={STORAGE_KEYS.THEME}>
       <TooltipProvider>
         <Sonner />
         <AppProvider>
