@@ -2,16 +2,16 @@
 
 A modern, responsive daily journaling application built with React, TypeScript, and Vite. It allows users to write daily entries, view past entries, and get a monthly summary of their journaling habits.
 
-## ✨ Key Features
+## Key Features
 
-- 📔 **Daily Journal:** A calm, distraction-free space to reflect on your day and keep memories alive.
-- 💰 **Budget Tracker:** Set monthly limits, separate needs vs wants, and monitor spending with visual indicators.
-- 🏋️ **Gym Ledger:** Log your workouts and stay accountable for your fitness goals.
-- 🔒 **Privacy First:** Enterprise-grade security with isolated tenant architecture and Supabase RLS.
-- 📱 **PWA & Offline Support:** Works offline with IndexedDB background sync; install it as a native app.
-- 📤 **Bulk Portability:** Seamlessly import data from CSV/Excel and export your history anytime.
-- 📊 **Rich Analytics:** Beautiful charts and monthly summaries to visualize your progress.
-- 🌗 **Responsive Design:** Stunning UI on all devices with full Dark and Light mode support.
+-  **Daily Journal:** A calm, distraction-free space to reflect on your day and keep memories alive.
+-  **Budget Tracker:** Set monthly limits, separate needs vs wants, and monitor spending with visual indicators.
+-  **Gym Ledger:** Log your workouts and stay accountable for your fitness goals.
+-  **Privacy First:** Enterprise-grade security with isolated tenant architecture and Supabase RLS.
+-  **PWA & Offline Support:** Works offline with IndexedDB background sync; install it as a native app.
+-  **Bulk Portability:** Seamlessly import data from CSV/Excel and export your history anytime.
+-  **Rich Analytics:** Beautiful charts and monthly summaries to visualize your progress.
+-  **Responsive Design:** Stunning UI on all devices with full Dark and Light mode support.
 
 ## Tech Stack
 

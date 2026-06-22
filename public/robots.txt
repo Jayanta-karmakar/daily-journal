@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /new
+Disallow: /entry/
+Disallow: /settings
+Disallow: /month-summary
+Disallow: /admin
+Disallow: /forgot-password
+Disallow: /reset-password
 
 Sitemap: https://journal.codebyjayanta.in/sitemap.xml

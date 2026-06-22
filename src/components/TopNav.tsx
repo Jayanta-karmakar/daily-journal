@@ -18,21 +18,21 @@ const TopNav = () => {
 
   return (
     <nav className={`flex items-center justify-between gap-1 bg-card border-b border-border px-4 md:px-6 py-3 sticky z-40 transition-all duration-300 ${(!isOnline || isSyncing) ? 'top-7 mt-7' : 'top-0'}`}>
-      <NavLink to="/" className="flex items-center gap-2 md:mr-6 group">
+      <NavLink to={APP_ROUTES.HOME} className="flex items-center gap-2 md:mr-6 group">
         <Logo size={30} className="drop-shadow-sm transition-transform duration-200 group-hover:scale-110" />
         <span className="text-lg font-bold bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">MyDiary</span>
       </NavLink>
       <div className="hidden md:flex flex-1 justify-center gap-1">
-        <NavLink to="/" className={({ isActive }) => linkClass(isActive)}>
+        <NavLink to={APP_ROUTES.DASHBOARD} className={({ isActive }) => linkClass(isActive)}>
           <Home size={16} /> Dashboard
         </NavLink>
-        <NavLink to="/new" className={({ isActive }) => linkClass(isActive)}>
+        <NavLink to={APP_ROUTES.NEW_ENTRY} className={({ isActive }) => linkClass(isActive)}>
           <PenSquare size={16} /> New Entry
         </NavLink>
-        <NavLink to="/month-summary" className={({ isActive }) => linkClass(isActive)}>
-          <BarChart3 size={16} /> Analytics
+        <NavLink to={APP_ROUTES.SUMMARY} className={({ isActive }) => linkClass(isActive)}>
+          <BarChart3 size={16} /> Summary
         </NavLink>
-        <NavLink to="/settings" className={({ isActive }) => linkClass(isActive)}>
+        <NavLink to={APP_ROUTES.SETTINGS} className={({ isActive }) => linkClass(isActive)}>
           <Settings size={16} /> Settings
         </NavLink>
         {profile?.role === AUTH_ROLES.ADMIN && (

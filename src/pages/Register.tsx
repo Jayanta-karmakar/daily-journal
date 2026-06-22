@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import Logo from '@/components/Logo';
 import { OAuthButtons } from '@/components/OAuthButtons';
+import SEO from '@/components/SEO';
 
 export default function Register() {
   const [fullName, setFullName] = useState('');
@@ -46,6 +47,11 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+      <SEO 
+        title="Create Account" 
+        description="Join MyDiary today. Start your journey with the most secure personal journal and budget tracker."
+        canonical="https://journal.codebyjayanta.in/register"
+      />
       {/* Decorative Blob */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] pointer-events-none"></div>
       

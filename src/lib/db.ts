@@ -1,5 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { DayEntry, MonthConfig } from '@/data/mockData';
+import { DATABASE } from '@/config/constants';
 
 interface JournalDB extends DBSchema {
   entries: {
@@ -24,8 +25,6 @@ export type SyncOperation = {
   timestamp: number;
 };
 
-const DB_VERSION = 1;
-
 // IMPORTANT: Each signed-in user gets their own physically separate
 // IndexedDB database, keyed by their Supabase user id. This is the
 // load-bearing fix for the cross-account data leak: a single shared
@@ -43,7 +42,7 @@ const getDB = (userId: string) => {
   }
   let promise = dbPromises.get(userId);
   if (!promise) {
-    promise = openDB<JournalDB>(dbNameFor(userId), DB_VERSION, {
+    promise = openDB<JournalDB>(dbNameFor(userId), DATABASE.IDB_VERSION, {
       upgrade(db) {
         if (!db.objectStoreNames.contains('entries')) {
           db.createObjectStore('entries', { keyPath: 'date' });

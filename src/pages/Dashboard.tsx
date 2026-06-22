@@ -9,6 +9,7 @@ import {
 import StatsCard from '@/components/StatsCard';
 import BudgetBar from '@/components/BudgetBar';
 import EntryCard from '@/components/EntryCard';
+import SEO from '@/components/SEO';
 
 // How many month-groups render up front, and how many more get revealed
 // each time the user scrolls near the bottom (or clicks "Load more").
@@ -90,6 +91,10 @@ const Dashboard = () => {
 
   return (
     <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 py-6 pb-24 md:pb-6">
+      <SEO
+        title="Dashboard"
+        robots="noindex, nofollow"
+      />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>

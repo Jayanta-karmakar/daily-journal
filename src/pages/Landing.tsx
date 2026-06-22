@@ -4,6 +4,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import Logo from '@/components/Logo';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) => (
   <div className="flex flex-col gap-4 p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:shadow-lg transition-all group">
@@ -20,6 +21,12 @@ const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode, title: stri
 export default function Landing() {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans overflow-x-hidden selection:bg-primary/20">
+      <SEO 
+        title="Master your day. Log your life." 
+        description="The all-in-one personal tracker for your thoughts, finances, and fitness. Private, secure, and built for progress."
+        keywords="daily journal, budget tracker, fitness ledger, expense manager, workout log, secure notes, private tracker, MyDiary, lifestyle app, finance tracker"
+        canonical="https://journal.codebyjayanta.in/"
+      />
       <Navbar />
 
       <main className="flex-1 pt-20">

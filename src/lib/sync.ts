@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import { getSyncQueue, removeFromSyncQueue, SyncOperation } from './db';
 import { DayEntry, MonthConfig } from '@/data/mockData';
 import type { Session } from '@supabase/supabase-js';
+import { DATABASE } from '@/config/constants';
 
 export const processSyncQueue = async (session: Session | null) => {
   const userId = session?.user?.id;
@@ -24,11 +25,11 @@ export const processSyncQueue = async (session: Session | null) => {
         success = await syncEntry(userId, operation.payload as DayEntry, operation.type);
       } else if (operation.type === 'DELETE_ENTRY') {
         const payload = operation.payload as { date: string };
-        const { error } = await supabase.from('entries').delete().eq('date', payload.date).eq('user_id', userId);
+        const { error } = await supabase.from(DATABASE.TABLES.ENTRIES).delete().eq('date', payload.date).eq('user_id', userId);
         success = !error;
       } else if (operation.type === 'UPDATE_CONFIG') {
         const payload = operation.payload as MonthConfig;
-        const { error } = await supabase.from('month_configs').upsert({
+        const { error } = await supabase.from(DATABASE.TABLES.MONTH_CONFIGS).upsert({
           user_id: userId,
           month: payload.month,
           daily_spend_limit: payload.dailySpendLimit,
@@ -48,13 +49,13 @@ export const processSyncQueue = async (session: Session | null) => {
 
 const syncEntry = async (userId: string, entry: DayEntry, type: 'ADD_ENTRY' | 'UPDATE_ENTRY') => {
   // Check if entry exists
-  const { data: existingData } = await supabase.from('entries').select('id').eq('date', entry.date).eq('user_id', userId).single();
+  const { data: existingData } = await supabase.from(DATABASE.TABLES.ENTRIES).select('id').eq('date', entry.date).eq('user_id', userId).single();
   
   let entryId = existingData?.id;
 
   if (type === 'ADD_ENTRY' && !existingData) {
     const { data: newEntryData, error } = await supabase
-      .from('entries')
+      .from(DATABASE.TABLES.ENTRIES)
       .insert({
         user_id: userId,
         date: entry.date,
@@ -74,7 +75,7 @@ const syncEntry = async (userId: string, entry: DayEntry, type: 'ADD_ENTRY' | 'U
     // Both act as an update if it already exists
     if (!entryId) return false;
     const { error } = await supabase
-      .from('entries')
+      .from(DATABASE.TABLES.ENTRIES)
       .update({
         journal_text: entry.journalText,
         gym_attended: entry.gymAttended,
@@ -93,7 +94,7 @@ const syncEntry = async (userId: string, entry: DayEntry, type: 'ADD_ENTRY' | 'U
     // entryId was only ever resolved via a user_id-scoped lookup above,
     // but we still scope this delete by user_id defensively so a future
     // refactor can't accidentally widen entryId's provenance.
-    await supabase.from('expenses').delete().eq('entry_id', entryId).eq('user_id', userId);
+    await supabase.from(DATABASE.TABLES.EXPENSES).delete().eq('entry_id', entryId).eq('user_id', userId);
     if (entry.expenses.length > 0) {
       const expensesToInsert = entry.expenses.map((e) => ({
         user_id: userId,
@@ -102,7 +103,7 @@ const syncEntry = async (userId: string, entry: DayEntry, type: 'ADD_ENTRY' | 'U
         amount: e.amount,
         expense_type: e.type,
       }));
-      const { error: insertError } = await supabase.from('expenses').insert(expensesToInsert);
+      const { error: insertError } = await supabase.from(DATABASE.TABLES.EXPENSES).insert(expensesToInsert);
       if (insertError) return false;
     }
   }

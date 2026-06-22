@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 import { DEVELOPER_INFO } from '@/config/constants';
 
 const Contact = () => {
@@ -10,6 +11,11 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
+      <SEO 
+        title="Contact Us" 
+        description="Get in touch with the creator of MyDiary. Available for collaborations, freelance projects, and full-time opportunities."
+        canonical="https://journal.codebyjayanta.in/contact"
+      />
       <Navbar />
       <div className="max-w-4xl mx-auto px-6 pt-32 pb-20 lg:pt-40 lg:pb-32">
 

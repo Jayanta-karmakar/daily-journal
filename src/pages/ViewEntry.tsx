@@ -4,6 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/data/calculations';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useState } from 'react';
+import SEO from '@/components/SEO';
 
 const typeColors: Record<string, string> = {
   need: 'bg-primary/5',
@@ -54,6 +55,10 @@ const ViewEntry = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-6">
+      <SEO 
+        title={`Entry ${date}`} 
+        robots="noindex, nofollow"
+      />
       <div className="flex justify-between items-center mb-6">
         <button onClick={() => navigate('/')} className="px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
           <ArrowLeft size={16} className="inline mr-1" /> Back

@@ -2,10 +2,16 @@ import { Link } from 'react-router-dom';
 import { Shield, Lock, EyeOff, Database, History, ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-background font-sans selection:bg-primary/20">
+      <SEO 
+        title="Privacy Policy" 
+        description="Learn how MyDiary protects your personal journal and budget data with industry-leading security and privacy standards."
+        canonical="https://journal.codebyjayanta.in/privacy"
+      />
       <Navbar />
 
       <main className="pt-32 pb-24 px-4 sm:px-8 max-w-4xl mx-auto">

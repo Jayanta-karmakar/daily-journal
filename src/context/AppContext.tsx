@@ -16,6 +16,7 @@ import {
   clearAllOfflineData,
 } from '@/lib/db';
 import { processSyncQueue } from '@/lib/sync';
+import { DATABASE, DEFAULTS } from '@/config/constants';
 
 interface AppContextType {
   entries: DayEntry[];
@@ -70,7 +71,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setSession(currSession);
       if (currSession?.user?.id) {
         const { data, error } = await supabase
-          .from('profiles')
+          .from(DATABASE.TABLES.PROFILES)
           .select('role, is_banned')
           .eq('id', currSession.user.id)
           .single();
@@ -157,7 +158,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (!session?.user?.id || !isOnline) return;
     const currentMonth = new Date().toISOString().slice(0, 7);
     const { data, error } = await supabase
-      .from('month_configs')
+      .from(DATABASE.TABLES.MONTH_CONFIGS)
       .select('*')
       .eq('user_id', session.user.id)
       .eq('month', currentMonth)
@@ -168,7 +169,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         month: data.month,
         dailySpendLimit: data.daily_spend_limit,
         monthlyBudget: data.monthly_budget,
-        currency: data.currency || 'INR',
+        currency: data.currency || DEFAULTS.CURRENCY,
       };
       setConfigState(upToDateConfig);
       await saveOfflineConfig(session.user.id, upToDateConfig);
@@ -181,7 +182,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       // bundled demo default), or the Dashboard/Summary silently show
       // the wrong month's data under the wrong label.
       const { data: latestData } = await supabase
-        .from('month_configs')
+        .from(DATABASE.TABLES.MONTH_CONFIGS)
         .select('daily_spend_limit, monthly_budget, currency')
         .eq('user_id', session.user.id)
         .order('month', { ascending: false })
@@ -202,7 +203,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const fetchEntries = async () => {
     if (!session?.user?.id || !isOnline) return;
     const { data, error } = await supabase
-      .from('entries')
+      .from(DATABASE.TABLES.ENTRIES)
       .select('*, expenses(*)')
       .eq('user_id', session.user.id)
       .order('date', { ascending: false });
@@ -246,7 +247,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const { error } = await supabase
-      .from('month_configs')
+      .from(DATABASE.TABLES.MONTH_CONFIGS)
       .upsert({
         user_id: session.user.id,
         month: newConfig.month,
@@ -280,7 +281,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const { data: newEntryData, error: entryError } = await supabase
-      .from('entries')
+      .from(DATABASE.TABLES.ENTRIES)
       .insert({
         user_id: session.user.id,
         date: entry.date,
@@ -308,7 +309,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         amount: e.amount,
         expense_type: e.type,
       }));
-      await supabase.from('expenses').insert(expensesToInsert);
+      await supabase.from(DATABASE.TABLES.EXPENSES).insert(expensesToInsert);
     }
   };
 
@@ -325,7 +326,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const { data: existingData } = await supabase.from('entries').select('id').eq('date', entry.date).eq('user_id', session.user.id).single();
+    const { data: existingData } = await supabase.from(DATABASE.TABLES.ENTRIES).select('id').eq('date', entry.date).eq('user_id', session.user.id).single();
     if (!existingData) {
       // If it doesn't exist remotely, it's actually an add
       await addToSyncQueue(session.user.id, { type: 'ADD_ENTRY', payload: entry, timestamp: Date.now() });
@@ -334,7 +335,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const { error: entryError } = await supabase
-      .from('entries')
+      .from(DATABASE.TABLES.ENTRIES)
       .update({
         journal_text: entry.journalText,
         gym_attended: entry.gymAttended,
@@ -352,7 +353,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Replace all expenses
-    await supabase.from('expenses').delete().eq('entry_id', existingData.id).eq('user_id', session.user.id);
+    await supabase.from(DATABASE.TABLES.EXPENSES).delete().eq('entry_id', existingData.id).eq('user_id', session.user.id);
     if (entry.expenses.length > 0) {
       const expensesToInsert = entry.expenses.map((e) => ({
         user_id: session.user.id,
@@ -361,7 +362,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         amount: e.amount,
         expense_type: e.type,
       }));
-      await supabase.from('expenses').insert(expensesToInsert);
+      await supabase.from(DATABASE.TABLES.EXPENSES).insert(expensesToInsert);
     }
   };
   
@@ -378,7 +379,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const { error } = await supabase.from('entries').delete().eq('date', date).eq('user_id', session.user.id);
+    const { error } = await supabase.from(DATABASE.TABLES.ENTRIES).delete().eq('date', date).eq('user_id', session.user.id);
     if (error) {
       toast.error('Failed to sync deletion. Added to sync queue.');
       await addToSyncQueue(session.user.id, { type: 'DELETE_ENTRY', payload: { date }, timestamp: Date.now() });
@@ -397,7 +398,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (session?.user?.id) await clearOfflineEntries(session.user.id);
 
     if (!session?.user?.id) return;
-    const { error } = await supabase.from('entries').delete().eq('user_id', session.user.id);
+    const { error } = await supabase.from(DATABASE.TABLES.ENTRIES).delete().eq('user_id', session.user.id);
     if (error) {
       toast.error('Failed to clear remote data');
       fetchEntries(); // Revert
@@ -425,7 +426,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
 
     const { error } = await supabase
-      .from('entries')
+      .from(DATABASE.TABLES.ENTRIES)
       .delete()
       .eq('user_id', session.user.id)
       .gte('date', `${month}-01`)
@@ -451,7 +452,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const { error } = await supabase
-      .from('entries')
+      .from(DATABASE.TABLES.ENTRIES)
       .delete()
       .eq('user_id', session.user.id)
       .gte('date', `${year}-01-01`)
