@@ -5,8 +5,12 @@ import { useAppContext } from '@/context/AppContext';
 import {
   getMonthTotalSpend, getMonthTotalInvested, getRemaining, getWorkingDays,
   getGymDays, getDaysOverLimit, getZeroSpendDays, getBiggestExpense,
-  getCategoryTotals, formatCurrency, getDailyTrend, getMonthlyTrend
+  getCategoryTotals, formatCurrency, getDailyTrend, getMonthlyTrend,
+  getTopExpenseLabels, getPeriodComparison
 } from '@/data/calculations';
+import PeriodComparisonBadge from '@/components/PeriodComparisonBadge';
+import TopExpensesCard from '@/components/TopExpensesCard';
+import WeekdayPatternChart from '@/components/WeekdayPatternChart';
 import {
   Card,
   CardContent,
@@ -34,7 +38,8 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { format, startOfMonth, endOfMonth, isWithinInterval, startOfYear, endOfYear, parseISO } from "date-fns";
+import { format, startOfMonth, endOfMonth, isWithinInterval, startOfYear, endOfYear, parseISO, subMonths, subDays, differenceInCalendarDays } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import {
   Area,
   AreaChart,
@@ -65,7 +70,12 @@ const SummaryPage = () => {
 
   // Filters State
   const [periodType, setPeriodType] = useState<PeriodType>('monthly');
-  const [selectedMonth, setSelectedMonth] = useState<string>(config.month); // YYYY-MM
+  // Default to today's real month rather than `config.month` — config is
+  // fetched asynchronously, so reading it here would freeze this state at
+  // whatever value config happened to hold on first render (often a stale
+  // placeholder before the fetch resolves), making the summary open on
+  // the wrong month.
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => format(new Date(), 'yyyy-MM')); // YYYY-MM
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: startOfMonth(new Date()),
@@ -104,11 +114,34 @@ const SummaryPage = () => {
     });
   }, [entries, periodType, selectedMonth, selectedYear, dateRange]);
 
+  // The equivalent immediately-preceding period (last month / last year /
+  // an equal-length range right before the selected one), used to power
+  // the period-over-period comparison badges below.
+  const previousPeriodEntries = useMemo(() => {
+    if (periodType === 'monthly') {
+      const prevMonth = format(subMonths(parseISO(`${selectedMonth}-01`), 1), 'yyyy-MM');
+      return entries.filter((e) => e.date.slice(0, 7) === prevMonth);
+    }
+    if (periodType === 'yearly') {
+      const prevYear = (parseInt(selectedYear, 10) - 1).toString();
+      return entries.filter((e) => e.date.startsWith(prevYear));
+    }
+    if (periodType === 'range' && dateRange.from && dateRange.to) {
+      const lengthDays = differenceInCalendarDays(dateRange.to, dateRange.from) + 1;
+      const prevTo = subDays(dateRange.from, 1);
+      const prevFrom = subDays(prevTo, lengthDays - 1);
+      return entries.filter((e) => isWithinInterval(parseISO(e.date), { start: prevFrom, end: prevTo }));
+    }
+    return [];
+  }, [entries, periodType, selectedMonth, selectedYear, dateRange]);
+
+  const previousPeriodLabel = periodType === 'monthly' ? 'last month' : periodType === 'yearly' ? 'last year' : 'previous period';
+
   // Calculations
   const totalSpend = getMonthTotalSpend(filteredEntries);
   const totalInvested = getMonthTotalInvested(filteredEntries);
-  const totalSalary = periodType === 'monthly' ? config.salary : (periodType === 'yearly' ? config.salary * 12 : 0); // Simplified for range
-  const remaining = totalSalary > 0 ? getRemaining(totalSalary, totalSpend) : 0;
+  const budgetTarget = periodType === 'monthly' ? config.monthlyBudget : (periodType === 'yearly' ? config.monthlyBudget * 12 : 0); // Simplified for range
+  const remaining = budgetTarget > 0 ? getRemaining(budgetTarget, totalSpend) : 0;
   
   const workingDays = getWorkingDays(filteredEntries);
   const gymDays = getGymDays(filteredEntries);
@@ -118,6 +151,12 @@ const SummaryPage = () => {
   const biggest = getBiggestExpense(filteredEntries);
   const categories = getCategoryTotals(filteredEntries);
   const totalAll = categories.need + categories.want + categories.investment + categories.savings;
+  const comparison = useMemo(
+    () => getPeriodComparison(filteredEntries, previousPeriodEntries),
+    [filteredEntries, previousPeriodEntries]
+  );
+  const topExpenses = useMemo(() => getTopExpenseLabels(filteredEntries), [filteredEntries]);
+  const isOverBudget = budgetTarget > 0 && remaining < 0;
 
   // Chart Data
   const categoryData = [
@@ -155,11 +194,11 @@ const SummaryPage = () => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-6 space-y-8 animate-in fade-in duration-500">
+    <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 py-6 pb-24 md:pb-6 space-y-8 animate-in fade-in duration-500">
       {/* Header & Navigation */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="icon" onClick={() => navigate(-1)} className="rounded-full shadow-sm">
+          <Button variant="outline" size="icon" onClick={() => navigate(-1)} aria-label="Go back" className="rounded-full shadow-sm">
             <ArrowLeft size={18} />
           </Button>
           <div>
@@ -239,7 +278,7 @@ const SummaryPage = () => {
                   mode="range"
                   defaultMonth={dateRange.from}
                   selected={{ from: dateRange.from, to: dateRange.to }}
-                  onSelect={(range: any) => setDateRange(range || { from: undefined, to: undefined })}
+                  onSelect={(range: DateRange | undefined) => setDateRange(range || { from: undefined, to: undefined })}
                   numberOfMonths={2}
                 />
               </PopoverContent>
@@ -256,7 +295,7 @@ const SummaryPage = () => {
             <DollarSign className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalSalary, config.currency)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(budgetTarget, config.currency)}</div>
             <p className="text-xs text-muted-foreground mt-1">Based on configuration</p>
           </CardContent>
         </Card>
@@ -267,7 +306,10 @@ const SummaryPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalSpend, config.currency)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{filteredEntries.length} entries recorded</p>
+            <div className="flex flex-col gap-1 mt-1">
+              <p className="text-xs text-muted-foreground">{filteredEntries.length} entries recorded</p>
+              <PeriodComparisonBadge changePct={comparison.spendChangePct} increaseIsBad periodLabel={previousPeriodLabel} />
+            </div>
           </CardContent>
         </Card>
         <Card className="border-none shadow-sm bg-success/5 hover:bg-success/10 transition-colors">
@@ -277,17 +319,26 @@ const SummaryPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalInvested, config.currency)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Wealth building phase</p>
+            <div className="flex flex-col gap-1 mt-1">
+              <p className="text-xs text-muted-foreground">Wealth building phase</p>
+              <PeriodComparisonBadge changePct={comparison.investedChangePct} increaseIsBad={false} periodLabel={previousPeriodLabel} />
+            </div>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-sm bg-investment/5 hover:bg-investment/10 transition-colors">
+        <Card className={cn(
+          "border-none shadow-sm transition-colors",
+          isOverBudget ? "bg-destructive/5 hover:bg-destructive/10" : "bg-investment/5 hover:bg-investment/10"
+        )}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-investment">Remaining</CardTitle>
-            <PiggyBank className="h-4 w-4 text-investment" />
+            <CardTitle className={cn(
+              "text-xs font-semibold uppercase tracking-wider",
+              isOverBudget ? "text-destructive" : "text-investment"
+            )}>Remaining</CardTitle>
+            <PiggyBank className={cn("h-4 w-4", isOverBudget ? "text-destructive" : "text-investment")} />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(remaining, config.currency)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Estimated balance</p>
+            <p className="text-xs text-muted-foreground mt-1">{isOverBudget ? 'Over monthly budget' : 'Estimated balance'}</p>
           </CardContent>
         </Card>
       </div>
@@ -463,6 +514,12 @@ const SummaryPage = () => {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Expense labels + weekday pattern */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TopExpensesCard items={topExpenses} currency={config.currency} />
+        <WeekdayPatternChart entries={filteredEntries} />
       </div>
 
       {/* Zero spend days indicator */}

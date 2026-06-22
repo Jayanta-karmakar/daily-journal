@@ -155,7 +155,7 @@ export default function Admin() {
             </h1>
           </div>
           <button onClick={() => navigate(-1)} className="px-4 py-2 rounded-xl border border-border bg-card text-foreground text-sm font-semibold flex items-center gap-2 hover:bg-muted transition-all shadow-sm w-fit h-[40px]">
-            <ArrowLeft size={16} /> Returns
+            <ArrowLeft size={16} /> Back
           </button>
         </div>
 

@@ -19,7 +19,6 @@ export interface DayEntry {
 
 export interface MonthConfig {
   month: string;
-  salary: number;
   dailySpendLimit: number;
   monthlyBudget: number;
   currency: string;
@@ -101,7 +100,6 @@ export const initialEntries: DayEntry[] = [
 
 export const initialMonthConfig: MonthConfig = {
   month: '2026-03',
-  salary: 45000,
   dailySpendLimit: 600,
   monthlyBudget: 15000,
   currency: 'INR',

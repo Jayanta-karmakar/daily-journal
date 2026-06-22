@@ -8,46 +8,64 @@ import { EntryPreviewRow } from './EntryPreviewRow';
 import { ImportConfirmBar, DuplicateAction } from './ImportConfirmBar';
 import { ParsedEntry } from './types';
 import { validateEntries } from './validateEntries';
+import { buildEntriesFromRows, RawRow } from './rowMapping';
 import { useAppContext } from '@/context/AppContext';
-import { parseCSV } from './parseCSV';
 import { DayEntry } from '@/data/mockData';
 import { toast } from 'sonner';
 import { ConfirmModal } from '../ConfirmModal';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 type FilterTab = 'all' | 'ready' | 'warning' | 'error';
 
+const IMPORT_CONCURRENCY = 4;
+
+async function runWithConcurrency<T>(items: T[], limit: number, worker: (item: T) => Promise<void>): Promise<void> {
+  let cursor = 0;
+  async function next(): Promise<void> {
+    const i = cursor++;
+    if (i >= items.length) return;
+    await worker(items[i]);
+    return next();
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => next()));
+}
+
 export const ImportSection = () => {
   const { entries, addEntry, updateEntry, refreshEntries } = useAppContext();
-  
+
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
-  const [fileDetails, setFileDetails] = useState<{ name: string; size: number; content: string } | null>(null);
+  const [fileMeta, setFileMeta] = useState<{ name: string; size: number } | null>(null);
+  const [rawRows, setRawRows] = useState<RawRow[] | null>(null);
   const [parsedEntries, setParsedEntries] = useState<ParsedEntry[]>([]);
   const [skippedCount, setSkippedCount] = useState(0);
-  
+  const [needsYearSelector, setNeedsYearSelector] = useState(false);
+
   const [filter, setFilter] = useState<FilterTab>('all');
   const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState({ done: 0, total: 0 });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [importSummary, setImportSummary] = useState({ added: 0, skipped: 0 });
 
-  const handleFileParsed = (entries: ParsedEntry[], filename: string, size: number, skipped: number, rawContent: string) => {
-    setParsedEntries(entries);
-    setFileDetails({ name: filename, size, content: rawContent });
-    setSkippedCount(skipped);
+  const handleFileParsed = (rows: RawRow[], filename: string, size: number) => {
+    setRawRows(rows);
+    setFileMeta({ name: filename, size });
     setImportSummary({ added: 0, skipped: 0 });
     setShowSuccessModal(false);
   };
 
-  // Re-parse if year changes after upload
+  // Build entries from the cached rows whenever they change, or the target
+  // year changes (only relevant for legacy year-less date formats).
   React.useEffect(() => {
-    if (fileDetails?.content) {
-      const entries = parseCSV(fileDetails.content, selectedYear);
-      setParsedEntries(entries);
-    }
-  }, [selectedYear, fileDetails?.content]);
+    if (!rawRows) return;
+    const { entries: built, skippedRows, needsYearSelector: needsYear } = buildEntriesFromRows(rawRows, selectedYear);
+    setParsedEntries(validateEntries(built));
+    setSkippedCount(skippedRows);
+    setNeedsYearSelector(needsYear);
+  }, [rawRows, selectedYear]);
 
   const resetState = () => {
-    setFileDetails(null);
+    setFileMeta(null);
+    setRawRows(null);
     setParsedEntries([]);
     setSkippedCount(0);
     setFilter('all');
@@ -76,7 +94,7 @@ export const ImportSection = () => {
 
   const handleSelectAll = (select: boolean) => {
     const visibleIds = new Set(filteredEntries.map(e => e.id));
-    setParsedEntries(parsedEntries.map(e => 
+    setParsedEntries(parsedEntries.map(e =>
       visibleIds.has(e.id) ? { ...e, selected: select } : e
     ));
   };
@@ -98,13 +116,14 @@ export const ImportSection = () => {
   }, [parsedEntries]);
 
   const handleConfirmImport = async (action: DuplicateAction) => {
+    const toImport = parsedEntries.filter(e => e.selected);
     setIsImporting(true);
+    setImportProgress({ done: 0, total: toImport.length });
+
     let added = 0;
     let skipped = 0;
 
-    const toImport = parsedEntries.filter(e => e.selected);
-
-    for (const entry of toImport) {
+    await runWithConcurrency(toImport, IMPORT_CONCURRENCY, async (entry) => {
       const existing = entries.find(x => x.date === entry.date);
       const dayEntry: DayEntry = {
         id: existing?.id || entry.date,
@@ -115,29 +134,34 @@ export const ImportSection = () => {
         expenses: entry.expenses,
         notes: entry.notes,
         totalSpend: entry.totalSpend,
-        totalInvested: entry.totalInvested
+        totalInvested: entry.totalInvested,
       };
 
-      if (existing) {
-        if (action === 'overwrite') {
-          await updateEntry(dayEntry);
-          added++;
+      try {
+        if (existing) {
+          if (action === 'overwrite') {
+            await updateEntry(dayEntry);
+            added++;
+          } else {
+            skipped++;
+          }
         } else {
-          skipped++;
+          await addEntry(dayEntry);
+          added++;
         }
-      } else {
-        await addEntry(dayEntry);
-        added++;
+      } catch (err) {
+        console.error(`Failed to import entry for ${entry.date}:`, err);
+        skipped++;
+      } finally {
+        setImportProgress(prev => ({ ...prev, done: prev.done + 1 }));
       }
-    }
+    });
 
     await refreshEntries();
     setIsImporting(false);
     setImportSummary({ added, skipped });
     setShowSuccessModal(true);
     resetState();
-    
-    toast.success('Process completed!');
   };
 
   const handleDownloadSample = async () => {
@@ -191,14 +215,27 @@ export const ImportSection = () => {
             </div>
             <div className="text-center">
               <h3 className="text-xl font-black text-foreground mb-2">Importing Data</h3>
-              <p className="text-xs font-bold text-foreground/60 uppercase tracking-widest animate-pulse">Please wait, don't close...</p>
+              {importProgress.total > 0 && (
+                <>
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-2">
+                    <div
+                      className="h-full bg-primary transition-all duration-300"
+                      style={{ width: `${Math.round((importProgress.done / importProgress.total) * 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-xs font-bold text-foreground/60 uppercase tracking-widest">
+                    {importProgress.done} / {importProgress.total} entries
+                  </p>
+                </>
+              )}
+              <p className="text-xs font-bold text-foreground/60 uppercase tracking-widest animate-pulse mt-1">Please wait, don't close...</p>
             </div>
           </div>
         </div>
       )}
 
       {/* SUCCESS MODAL */}
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
         onConfirm={() => setShowSuccessModal(false)}
@@ -214,11 +251,11 @@ export const ImportSection = () => {
               <FileUp size={20} />
            </div>
            <div>
-             <h2 className="text-base sm:text-lg font-bold text-foreground">Import from CSV</h2>
+             <h2 className="text-base sm:text-lg font-bold text-foreground">Import from CSV or Excel</h2>
              <p className="text-xs sm:text-sm text-foreground/70 mt-0.5">Bring your legacy records exactly into MyDiary format</p>
            </div>
         </div>
-        <button 
+        <button
           onClick={handleDownloadSample}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-background border border-border text-foreground/70 hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all text-xs font-bold shadow-sm self-end sm:self-center"
         >
@@ -229,17 +266,17 @@ export const ImportSection = () => {
       <div className="p-6 md:p-8">
 
         {/* STEP 1: UPLOAD */}
-        {!fileDetails && (
-          <FileUpload onParsed={handleFileParsed} selectedYear={selectedYear} />
+        {!fileMeta && (
+          <FileUpload onParsed={handleFileParsed} />
         )}
 
-        {/* YEAR SELECTION - Appears after upload */}
-        {fileDetails && (
+        {/* YEAR SELECTION - only shown when the file's date format has no year (legacy "1 Jan" style) */}
+        {fileMeta && needsYearSelector && (
           <div className="mb-6 flex flex-col sm:flex-row items-center justify-center gap-4 p-4 rounded-2xl border transition-all bg-muted/30 border-border animate-in slide-in-from-top duration-500">
             <div className="text-center sm:text-left">
               <h3 className="text-sm font-bold text-foreground">Target Year</h3>
               <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                Entries will be assigned to this year
+                Your dates don't include a year — pick one to assign
               </p>
             </div>
             <div className="flex bg-background p-1 rounded-xl shadow-sm border border-border">
@@ -248,8 +285,8 @@ export const ImportSection = () => {
                   key={year}
                   onClick={() => setSelectedYear(year.toString())}
                   className={`px-4 py-2 rounded-lg text-sm font-black transition-all ${
-                    selectedYear === year.toString() 
-                      ? 'bg-primary text-primary-foreground shadow-lg scale-105' 
+                    selectedYear === year.toString()
+                      ? 'bg-primary text-primary-foreground shadow-lg scale-105'
                       : 'hover:bg-muted text-muted-foreground'
                   }`}
                 >
@@ -260,15 +297,15 @@ export const ImportSection = () => {
           </div>
         )}
 
-        {fileDetails && (
+        {fileMeta && (
           <div className="mb-8">
             <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-card">
                 <div className="flex justify-center items-center gap-2 text-success mb-1">
                   <span className="text-xl">✅</span>
-                  <span className="font-semibold text-sm">{fileDetails.name}</span>
+                  <span className="font-semibold text-sm">{fileMeta.name}</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {(fileDetails.size / 1024).toFixed(1)} KB
+                  {(fileMeta.size / 1024).toFixed(1)} KB
                   <button onClick={resetState} className="ml-3 text-primary hover:underline font-medium">Reset File</button>
                 </div>
             </div>
@@ -278,13 +315,13 @@ export const ImportSection = () => {
         {/* STEP 2: PREVIEW */}
         {parsedEntries.length > 0 && (
           <div className="space-y-6">
-            <ParseSummaryBar 
+            <ParseSummaryBar
               parsedCount={parsedEntries.length}
               warningCount={stats.warning}
               errorCount={stats.error}
               skippedCount={skippedCount}
             />
-            
+
             <BulkTypeFixer onApply={handleApplyBulkType} />
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
@@ -297,7 +334,7 @@ export const ImportSection = () => {
                       filter === f ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    {f === 'all' ? 'All' : 
+                    {f === 'all' ? 'All' :
                      f === 'ready' ? '✅ Ready' :
                      f === 'warning' ? '⚠️ Warning' : '❌ Error'}
                   </button>
@@ -305,7 +342,7 @@ export const ImportSection = () => {
               </div>
 
               <div className="flex items-center gap-3 bg-muted/30 px-3 py-2 rounded-xl border border-border/50">
-                <input 
+                <input
                   type="checkbox"
                   className="w-4 h-4 accent-primary cursor-pointer"
                   checked={filteredEntries.length > 0 && filteredEntries.every(e => e.selected)}
@@ -317,10 +354,10 @@ export const ImportSection = () => {
 
             <div className="space-y-0">
                {filteredEntries.map(entry => (
-                 <EntryPreviewRow 
-                   key={entry.id} 
-                   entry={entry} 
-                   onChange={handleUpdateEntry} 
+                 <EntryPreviewRow
+                   key={entry.id}
+                   entry={entry}
+                   onChange={handleUpdateEntry}
                  />
                ))}
                {filteredEntries.length === 0 && (
@@ -330,14 +367,14 @@ export const ImportSection = () => {
                )}
             </div>
 
-            <ImportConfirmBar 
+            <ImportConfirmBar
               selectedCount={stats.selected}
               isImporting={isImporting}
               onCancel={resetState}
               onImportInit={() => {
                 const selectedDates = parsedEntries.filter(e => e.selected).map(e => e.date);
                 const existingMatches = entries.filter(e => selectedDates.includes(e.date));
-                return { duplicates: existingMatches.map(e => `${e.date.slice(5).replace('-', ' ')}`) }; 
+                return { duplicates: existingMatches.map(e => `${e.date.slice(5).replace('-', ' ')}`) };
               }}
               onConfirm={handleConfirmImport}
             />

@@ -77,10 +77,11 @@ export const EntryPreviewRow: React.FC<EntryPreviewRowProps> = ({ entry, onChang
       {expanded && (
         <div className="p-6 md:p-8 border-t border-border/50 bg-background/30 space-y-8">
           {/* Warnings & Errors */}
-          {(entry.warnings.length > 0 || entry.errors.length > 0) && (
+          {(entry.warnings.length > 0 || entry.errors.length > 0 || entry.parseNotes.length > 0) && (
             <div className="text-sm space-y-2 bg-yellow-500/5 dark:bg-yellow-500/10 rounded-2xl p-4 border border-yellow-500/20 max-h-60 overflow-y-auto custom-scrollbar">
               <h4 className="text-[10px] uppercase tracking-widest font-black text-yellow-600 mb-2">Validation Summary</h4>
               {entry.errors.map((e, i) => <div key={'e'+i} className="text-destructive font-semibold flex items-start gap-2 "><span className="mt-1 shrink-0">❌</span> {e}</div>)}
+              {entry.parseNotes.map((n, i) => <div key={'n'+i} className="text-yellow-600 dark:text-yellow-500 font-semibold flex items-start gap-2 "><span className="mt-1 shrink-0">⚠️</span> {n}</div>)}
               {entry.warnings.map((w, i) => <div key={'w'+i} className="text-yellow-600 dark:text-yellow-500 font-semibold flex items-start gap-2 "><span className="mt-1 shrink-0">⚠️</span> {w}</div>)}
             </div>
           )}

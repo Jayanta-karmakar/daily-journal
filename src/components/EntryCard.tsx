@@ -50,6 +50,7 @@ const EntryCard = ({ entry }: EntryCardProps) => {
             }}
             className="p-1 px-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             title="Delete entry"
+            aria-label="Delete entry"
           >
             <Trash2 size={16} />
           </button>

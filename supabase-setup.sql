@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS public.month_configs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     month TEXT NOT NULL, -- Format: YYYY-MM
-    salary NUMERIC NOT NULL DEFAULT 0,
     daily_spend_limit NUMERIC NOT NULL DEFAULT 0,
     monthly_budget NUMERIC NOT NULL DEFAULT 0,
     currency TEXT NOT NULL DEFAULT 'INR',

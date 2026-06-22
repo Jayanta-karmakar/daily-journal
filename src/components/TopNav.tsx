@@ -30,7 +30,7 @@ const TopNav = () => {
           <PenSquare size={16} /> New Entry
         </NavLink>
         <NavLink to="/month-summary" className={({ isActive }) => linkClass(isActive)}>
-          <BarChart3 size={16} /> Summary
+          <BarChart3 size={16} /> Analytics
         </NavLink>
         <NavLink to="/settings" className={({ isActive }) => linkClass(isActive)}>
           <Settings size={16} /> Settings

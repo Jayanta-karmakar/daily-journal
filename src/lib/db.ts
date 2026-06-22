@@ -20,18 +20,30 @@ interface JournalDB extends DBSchema {
 export type SyncOperation = {
   id?: number;
   type: 'ADD_ENTRY' | 'UPDATE_ENTRY' | 'DELETE_ENTRY' | 'UPDATE_CONFIG';
-  payload: any;
+  payload: unknown;
   timestamp: number;
 };
 
-const DB_NAME = 'MyDiaryDB';
 const DB_VERSION = 1;
 
-let dbPromise: Promise<IDBPDatabase<JournalDB>>;
+// IMPORTANT: Each signed-in user gets their own physically separate
+// IndexedDB database, keyed by their Supabase user id. This is the
+// load-bearing fix for the cross-account data leak: a single shared
+// "MyDiaryDB" meant that on a shared device, logging in as a different
+// user could read (or even sync-queue-write) the previous user's
+// offline-cached entries, configs, and pending sync operations.
+// With one DB per user, there is no shared storage to leak from.
+const dbPromises = new Map<string, Promise<IDBPDatabase<JournalDB>>>();
 
-export const getDB = () => {
-  if (!dbPromise) {
-    dbPromise = openDB<JournalDB>(DB_NAME, DB_VERSION, {
+const dbNameFor = (userId: string) => `MyDiaryDB_${userId}`;
+
+const getDB = (userId: string) => {
+  if (!userId) {
+    throw new Error('getDB() requires a userId — offline storage is namespaced per user.');
+  }
+  let promise = dbPromises.get(userId);
+  if (!promise) {
+    promise = openDB<JournalDB>(dbNameFor(userId), DB_VERSION, {
       upgrade(db) {
         if (!db.objectStoreNames.contains('entries')) {
           db.createObjectStore('entries', { keyPath: 'date' });
@@ -45,33 +57,34 @@ export const getDB = () => {
         }
       },
     });
+    dbPromises.set(userId, promise);
   }
-  return dbPromise;
+  return promise;
 };
 
 // Entries
-export const getOfflineEntries = async () => {
-  const db = await getDB();
+export const getOfflineEntries = async (userId: string) => {
+  const db = await getDB(userId);
   return db.getAll('entries');
 };
 
-export const saveOfflineEntry = async (entry: DayEntry) => {
-  const db = await getDB();
+export const saveOfflineEntry = async (userId: string, entry: DayEntry) => {
+  const db = await getDB(userId);
   await db.put('entries', entry);
 };
 
-export const deleteOfflineEntry = async (date: string) => {
-  const db = await getDB();
+export const deleteOfflineEntry = async (userId: string, date: string) => {
+  const db = await getDB(userId);
   await db.delete('entries', date);
 };
 
-export const clearOfflineEntries = async () => {
-  const db = await getDB();
+export const clearOfflineEntries = async (userId: string) => {
+  const db = await getDB(userId);
   await db.clear('entries');
 };
 
-export const saveBulkOfflineEntries = async (entries: DayEntry[]) => {
-  const db = await getDB();
+export const saveBulkOfflineEntries = async (userId: string, entries: DayEntry[]) => {
+  const db = await getDB(userId);
   const tx = db.transaction('entries', 'readwrite');
   await Promise.all([
     ...entries.map(entry => tx.store.put(entry)),
@@ -80,33 +93,53 @@ export const saveBulkOfflineEntries = async (entries: DayEntry[]) => {
 };
 
 // Configs
-export const getOfflineConfig = async (month: string) => {
-  const db = await getDB();
+export const getOfflineConfig = async (userId: string, month: string) => {
+  const db = await getDB(userId);
   return db.get('configs', month);
 };
 
-export const saveOfflineConfig = async (config: MonthConfig) => {
-  const db = await getDB();
+export const saveOfflineConfig = async (userId: string, config: MonthConfig) => {
+  const db = await getDB(userId);
   await db.put('configs', config);
 };
 
+export const clearOfflineConfigs = async (userId: string) => {
+  const db = await getDB(userId);
+  await db.clear('configs');
+};
+
 // Sync Queue
-export const getSyncQueue = async () => {
-  const db = await getDB();
+export const getSyncQueue = async (userId: string) => {
+  const db = await getDB(userId);
   return db.getAll('syncQueue');
 };
 
-export const addToSyncQueue = async (operation: Omit<SyncOperation, 'id'>) => {
-  const db = await getDB();
+export const addToSyncQueue = async (userId: string, operation: Omit<SyncOperation, 'id'>) => {
+  const db = await getDB(userId);
   await db.add('syncQueue', operation as SyncOperation);
 };
 
-export const removeFromSyncQueue = async (id: number) => {
-  const db = await getDB();
+export const removeFromSyncQueue = async (userId: string, id: number) => {
+  const db = await getDB(userId);
   await db.delete('syncQueue', id);
 };
 
-export const clearSyncQueue = async () => {
-  const db = await getDB();
+export const clearSyncQueue = async (userId: string) => {
+  const db = await getDB(userId);
   await db.clear('syncQueue');
+};
+
+// Wipes every offline store for a single user (entries + configs +
+// pending sync queue). Used on logout so a shared/public device doesn't
+// retain plaintext journal data after the user signs out.
+export const clearAllOfflineData = async (userId: string) => {
+  const db = await getDB(userId);
+  await Promise.all([
+    db.clear('entries'),
+    db.clear('configs'),
+    db.clear('syncQueue'),
+  ]);
+  // Drop the cached connection too so a future re-login for this same
+  // user re-opens cleanly rather than reusing a stale handle.
+  dbPromises.delete(userId);
 };

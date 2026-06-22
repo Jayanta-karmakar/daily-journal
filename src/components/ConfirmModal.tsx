@@ -52,8 +52,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             }`}>
               {variant === 'danger' ? <AlertTriangle size={28} /> : <Info size={28} />}
             </div>
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
+              aria-label="Close dialog"
               className="p-2.5 hover:bg-muted rounded-2xl transition-all text-muted-foreground hover:text-foreground active:scale-90"
             >
               <X size={20} />

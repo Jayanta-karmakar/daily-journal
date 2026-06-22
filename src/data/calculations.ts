@@ -14,8 +14,8 @@ export const getMonthTotalSpend = (entries: DayEntry[]): number =>
 export const getMonthTotalInvested = (entries: DayEntry[]): number =>
   entries.reduce((s, e) => s + e.totalInvested, 0);
 
-export const getRemaining = (salary: number, totalSpend: number): number =>
-  salary - totalSpend;
+export const getRemaining = (monthlyBudget: number, totalSpend: number): number =>
+  monthlyBudget - totalSpend;
 
 export const getWorkingDays = (entries: DayEntry[]): number =>
   entries.filter((e) => e.day !== 'Sunday').length;
@@ -112,4 +112,90 @@ export const getMonthlyTrend = (entries: DayEntry[]) => {
   });
 
   return Object.values(months).sort((a, b) => a.month.localeCompare(b.month));
+};
+
+// Aggregates expense line-items by label (case/whitespace-insensitive),
+// restricted to 'need'/'want' types so the totals line up with
+// totalSpend (investment/savings transfers aren't "expenses" in that
+// sense — including them would make e.g. a loan repayment look like
+// the user's biggest "expense").
+export const getTopExpenseLabels = (entries: DayEntry[], topN = 6) => {
+  const totals = new Map<string, { label: string; total: number; count: number }>();
+  for (const entry of entries) {
+    for (const exp of entry.expenses) {
+      if (exp.type !== 'need' && exp.type !== 'want') continue;
+      const key = exp.label.trim().toLowerCase();
+      if (!key) continue;
+      const existing = totals.get(key);
+      if (existing) {
+        existing.total += exp.amount;
+        existing.count += 1;
+      } else {
+        totals.set(key, { label: exp.label.trim(), total: exp.amount, count: 1 });
+      }
+    }
+  }
+  return Array.from(totals.values())
+    .sort((a, b) => b.total - a.total)
+    .slice(0, topN);
+};
+
+export const WEEKDAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+export const getWeekdaySpending = (entries: DayEntry[]) => {
+  const totals = new Map<string, { total: number; count: number }>(
+    WEEKDAY_ORDER.map((day) => [day, { total: 0, count: 0 }])
+  );
+  for (const entry of entries) {
+    const day = WEEKDAY_ORDER.includes(entry.day) ? entry.day : getDayOfWeek(entry.date);
+    const bucket = totals.get(day);
+    if (bucket) {
+      bucket.total += entry.totalSpend;
+      bucket.count += 1;
+    }
+  }
+  return WEEKDAY_ORDER.map((day) => {
+    const bucket = totals.get(day)!;
+    return {
+      day,
+      shortDay: day.slice(0, 3),
+      total: bucket.total,
+      count: bucket.count,
+      avg: bucket.count > 0 ? bucket.total / bucket.count : 0,
+    };
+  });
+};
+
+export interface PeriodComparison {
+  currentSpend: number;
+  previousSpend: number;
+  spendChangePct: number | null; // null = no prior-period data to compare against
+  currentInvested: number;
+  previousInvested: number;
+  investedChangePct: number | null;
+}
+
+// Compares two entry sets (e.g. this month vs. last month). A null
+// change percentage means the previous period had zero in that bucket,
+// so a percentage change isn't meaningful — callers should show
+// "New"/"—" rather than a misleading +Infinity%.
+export const getPeriodComparison = (current: DayEntry[], previous: DayEntry[]): PeriodComparison => {
+  const currentSpend = getMonthTotalSpend(current);
+  const previousSpend = getMonthTotalSpend(previous);
+  const currentInvested = getMonthTotalInvested(current);
+  const previousInvested = getMonthTotalInvested(previous);
+
+  const pctChange = (curr: number, prev: number): number | null => {
+    if (prev === 0) return null;
+    return ((curr - prev) / prev) * 100;
+  };
+
+  return {
+    currentSpend,
+    previousSpend,
+    spendChangePct: pctChange(currentSpend, previousSpend),
+    currentInvested,
+    previousInvested,
+    investedChangePct: pctChange(currentInvested, previousInvested),
+  };
 };

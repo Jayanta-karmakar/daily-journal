@@ -1,30 +1,36 @@
 import { supabase } from './supabase';
 import { getSyncQueue, removeFromSyncQueue, SyncOperation } from './db';
 import { DayEntry, MonthConfig } from '@/data/mockData';
+import type { Session } from '@supabase/supabase-js';
 
-export const processSyncQueue = async (session: any) => {
-  if (!navigator.onLine || !session?.user?.id) return;
+export const processSyncQueue = async (session: Session | null) => {
+  const userId = session?.user?.id;
+  if (!navigator.onLine || !userId) return;
 
-  const queue = await getSyncQueue();
+  // Each user's offline sync queue now lives in that user's own
+  // namespaced IndexedDB database (see lib/db.ts), so this queue can
+  // only ever contain operations this same user queued themselves —
+  // it's no longer possible to replay another account's pending writes
+  // into this session.
+  const queue = await getSyncQueue(userId);
   if (queue.length === 0) return;
 
   console.log(`Processing ${queue.length} items in sync queue...`);
-  
+
   for (const operation of queue) {
     let success = false;
     try {
       if (operation.type === 'ADD_ENTRY' || operation.type === 'UPDATE_ENTRY') {
-        success = await syncEntry(session.user.id, operation.payload as DayEntry, operation.type);
+        success = await syncEntry(userId, operation.payload as DayEntry, operation.type);
       } else if (operation.type === 'DELETE_ENTRY') {
         const payload = operation.payload as { date: string };
-        const { error } = await supabase.from('entries').delete().eq('date', payload.date).eq('user_id', session.user.id);
+        const { error } = await supabase.from('entries').delete().eq('date', payload.date).eq('user_id', userId);
         success = !error;
       } else if (operation.type === 'UPDATE_CONFIG') {
         const payload = operation.payload as MonthConfig;
         const { error } = await supabase.from('month_configs').upsert({
-          user_id: session.user.id,
+          user_id: userId,
           month: payload.month,
-          salary: payload.salary,
           daily_spend_limit: payload.dailySpendLimit,
           monthly_budget: payload.monthlyBudget,
         }, { onConflict: 'user_id, month' });
@@ -32,7 +38,7 @@ export const processSyncQueue = async (session: any) => {
       }
 
       if (success && operation.id) {
-        await removeFromSyncQueue(operation.id);
+        await removeFromSyncQueue(userId, operation.id);
       }
     } catch (e) {
       console.error('Error syncing operation:', operation, e);
@@ -76,14 +82,18 @@ const syncEntry = async (userId: string, entry: DayEntry, type: 'ADD_ENTRY' | 'U
         total_spend: entry.totalSpend,
         total_invested: entry.totalInvested,
       })
-      .eq('id', entryId);
-    
+      .eq('id', entryId)
+      .eq('user_id', userId);
+
     if (error) return false;
   }
 
   // Handle expenses sync
   if (entryId) {
-    await supabase.from('expenses').delete().eq('entry_id', entryId);
+    // entryId was only ever resolved via a user_id-scoped lookup above,
+    // but we still scope this delete by user_id defensively so a future
+    // refactor can't accidentally widen entryId's provenance.
+    await supabase.from('expenses').delete().eq('entry_id', entryId).eq('user_id', userId);
     if (entry.expenses.length > 0) {
       const expensesToInsert = entry.expenses.map((e) => ({
         user_id: userId,

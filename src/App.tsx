@@ -34,13 +34,17 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { session, loading } = useAppContext();
-  
+  // useLocation must run unconditionally on every render (React's rules
+  // of hooks) — it was previously called after the `loading` early
+  // return below, which changes the number/order of hooks called
+  // between the loading and loaded renders and can corrupt state or
+  // throw "Rendered more hooks than during the previous render".
+  const location = useLocation();
+  const isLegalPage = HIDE_NAV_PATHS.includes(location.pathname);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-foreground bg-background">Loading...</div>;
   }
-  
-  const location = useLocation();
-  const isLegalPage = HIDE_NAV_PATHS.includes(location.pathname);
 
   if (!session) {
     return (

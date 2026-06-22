@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
-import { DayEntry, MonthConfig, Expense, initialMonthConfig } from '@/data/mockData';
+import { DayEntry, MonthConfig, initialMonthConfig } from '@/data/mockData';
 import { toast } from 'sonner';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import type { Session } from '@supabase/supabase-js';
 import {
   getOfflineEntries,
   saveOfflineEntry,
@@ -11,7 +12,8 @@ import {
   saveBulkOfflineEntries,
   getOfflineConfig,
   saveOfflineConfig,
-  addToSyncQueue
+  addToSyncQueue,
+  clearAllOfflineData,
 } from '@/lib/db';
 import { processSyncQueue } from '@/lib/sync';
 
@@ -22,7 +24,7 @@ interface AppContextType {
   addEntry: (entry: DayEntry) => void;
   updateEntry: (entry: DayEntry) => void;
   getEntryByDate: (date: string) => DayEntry | undefined;
-  session: any;
+  session: Session | null;
   profile: {
     role: string;
     is_banned: boolean;
@@ -41,19 +43,30 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<{ role: string, is_banned: boolean } | null>(null);
   const [entries, setEntries] = useState<DayEntry[]>([]);
   const [config, setConfigState] = useState<MonthConfig>(initialMonthConfig);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
-  
+
   const isOnline = useOnlineStatus();
 
   const [isInitialized, setIsInitialized] = useState(false);
+  // Tracks the previously-seen user id so we can wipe in-memory state the
+  // instant the signed-in user changes, rather than briefly showing the
+  // previous user's entries/config while the new user's data loads.
+  const lastUserIdRef = React.useRef<string | null>(null);
 
   useEffect(() => {
-    const handleAuthChange = async (currSession: any) => {
+    const handleAuthChange = async (currSession: Session | null) => {
+      const newUserId = currSession?.user?.id ?? null;
+      if (newUserId !== lastUserIdRef.current) {
+        lastUserIdRef.current = newUserId;
+        setEntries([]);
+        setConfigState(initialMonthConfig);
+        setProfile(null);
+      }
       setSession(currSession);
       if (currSession?.user?.id) {
         const { data, error } = await supabase
@@ -89,23 +102,30 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!isInitialized) return; // Wait until initial session check completes
 
-    const loadOfflineData = async () => {
-      const offlineEntries = await getOfflineEntries();
+    const loadOfflineData = async (userId: string) => {
+      const offlineEntries = await getOfflineEntries(userId);
       if (offlineEntries.length > 0) {
         // Sort offline entries by date descending to match UI expectation
         offlineEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setEntries(offlineEntries);
       }
-      
+
       const currentMonth = new Date().toISOString().slice(0, 7);
-      const offlineConfig = await getOfflineConfig(currentMonth);
+      const offlineConfig = await getOfflineConfig(userId, currentMonth);
       if (offlineConfig) {
         setConfigState(offlineConfig);
+      } else {
+        // No cached config for the real current month — don't leave
+        // `month` pointing at the bundled default (initialMonthConfig,
+        // hardcoded to an old month). fetchConfig() will refine this
+        // further once it runs, but this keeps the displayed month
+        // correct even while fully offline with no prior cache.
+        setConfigState((prev) => ({ ...prev, month: currentMonth }));
       }
     };
-    
+
     if (session?.user?.id) {
-      loadOfflineData().then(() => {
+      loadOfflineData(session.user.id).then(() => {
         if (isOnline) {
           fetchConfig();
           fetchEntries().finally(() => setLoading(false));
@@ -146,25 +166,36 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (data && !error) {
       const upToDateConfig = {
         month: data.month,
-        salary: data.salary,
         dailySpendLimit: data.daily_spend_limit,
         monthlyBudget: data.monthly_budget,
         currency: data.currency || 'INR',
       };
       setConfigState(upToDateConfig);
-      await saveOfflineConfig(upToDateConfig);
+      await saveOfflineConfig(session.user.id, upToDateConfig);
     } else {
-      // If no config for current month, try to get the latest one to "lock" the currency choice
+      // No config saved yet for the real current month. Carry forward the
+      // most recent month's budget settings as sensible defaults (most
+      // users keep the same budget month to month), but `month`
+      // itself must always be set to the actual current month — never
+      // left pointing at a stale previously-loaded value (e.g. the
+      // bundled demo default), or the Dashboard/Summary silently show
+      // the wrong month's data under the wrong label.
       const { data: latestData } = await supabase
         .from('month_configs')
-        .select('currency')
+        .select('daily_spend_limit, monthly_budget, currency')
         .eq('user_id', session.user.id)
         .order('month', { ascending: false })
         .limit(1);
-      
-      if (latestData && latestData.length > 0 && latestData[0].currency) {
-        setConfigState(prev => ({ ...prev, currency: latestData[0].currency }));
-      }
+
+      const latest = latestData && latestData.length > 0 ? latestData[0] : null;
+      const carriedForwardConfig: MonthConfig = {
+        month: currentMonth,
+        dailySpendLimit: latest?.daily_spend_limit ?? initialMonthConfig.dailySpendLimit,
+        monthlyBudget: latest?.monthly_budget ?? initialMonthConfig.monthlyBudget,
+        currency: latest?.currency || 'INR',
+      };
+      setConfigState(carriedForwardConfig);
+      await saveOfflineConfig(session.user.id, carriedForwardConfig);
     }
   };
 
@@ -181,7 +212,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (data) {
-      const formattedEntries: DayEntry[] = data.map((d: any) => ({
+      const formattedEntries: DayEntry[] = data.map((d) => ({
         id: d.id,
         date: d.date,
         day: d.day,
@@ -190,7 +221,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         notes: d.notes || '',
         totalSpend: Number(d.total_spend),
         totalInvested: Number(d.total_invested),
-        expenses: d.expenses.map((e: any) => ({
+        expenses: (d.expenses ?? []).map((e: { id: string; label: string; amount: number; expense_type: 'need' | 'want' | 'investment' | 'savings' }) => ({
           id: e.id,
           label: e.label,
           amount: Number(e.amount),
@@ -198,19 +229,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         })),
       }));
       setEntries(formattedEntries);
-      await saveBulkOfflineEntries(formattedEntries);
+      await saveBulkOfflineEntries(session.user.id, formattedEntries);
     }
   };
 
   const setConfig = async (newConfig: MonthConfig) => {
     setConfigState(newConfig);
-    await saveOfflineConfig(newConfig);
 
     if (!session?.user?.id) return;
+    await saveOfflineConfig(session.user.id, newConfig);
 
     if (!isOnline) {
       toast('Saved offline. Will sync when back online.', { icon: '🔄' });
-      await addToSyncQueue({ type: 'UPDATE_CONFIG', payload: newConfig, timestamp: Date.now() });
+      await addToSyncQueue(session.user.id, { type: 'UPDATE_CONFIG', payload: newConfig, timestamp: Date.now() });
       return;
     }
 
@@ -219,7 +250,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       .upsert({
         user_id: session.user.id,
         month: newConfig.month,
-        salary: newConfig.salary,
         daily_spend_limit: newConfig.dailySpendLimit,
         monthly_budget: newConfig.monthlyBudget,
         currency: newConfig.currency,
@@ -239,13 +269,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     // Optimistic Update
     setEntries(prev => [entry, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    await saveOfflineEntry(entry);
 
     if (!session?.user?.id) return;
+    await saveOfflineEntry(session.user.id, entry);
 
     if (!isOnline) {
       toast('Saved offline. Will sync when back online.', { icon: '🔄' });
-      await addToSyncQueue({ type: 'ADD_ENTRY', payload: entry, timestamp: Date.now() });
+      await addToSyncQueue(session.user.id, { type: 'ADD_ENTRY', payload: entry, timestamp: Date.now() });
       return;
     }
 
@@ -266,7 +296,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     if (entryError || !newEntryData) {
       toast.error('Failed to sync. Added to sync queue.');
-      await addToSyncQueue({ type: 'ADD_ENTRY', payload: entry, timestamp: Date.now() });
+      await addToSyncQueue(session.user.id, { type: 'ADD_ENTRY', payload: entry, timestamp: Date.now() });
       return;
     }
 
@@ -285,20 +315,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const updateEntry = async (entry: DayEntry) => {
     // Optimistic Update
     setEntries(prev => prev.map(e => e.date === entry.date ? entry : e));
-    await saveOfflineEntry(entry);
 
     if (!session?.user?.id) return;
+    await saveOfflineEntry(session.user.id, entry);
 
     if (!isOnline) {
       toast('Saved offline. Will sync when back online.', { icon: '🔄' });
-      await addToSyncQueue({ type: 'UPDATE_ENTRY', payload: entry, timestamp: Date.now() });
+      await addToSyncQueue(session.user.id, { type: 'UPDATE_ENTRY', payload: entry, timestamp: Date.now() });
       return;
     }
 
     const { data: existingData } = await supabase.from('entries').select('id').eq('date', entry.date).eq('user_id', session.user.id).single();
     if (!existingData) {
       // If it doesn't exist remotely, it's actually an add
-      await addToSyncQueue({ type: 'ADD_ENTRY', payload: entry, timestamp: Date.now() });
+      await addToSyncQueue(session.user.id, { type: 'ADD_ENTRY', payload: entry, timestamp: Date.now() });
       processSyncQueue(session);
       return;
     }
@@ -312,16 +342,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         total_spend: entry.totalSpend,
         total_invested: entry.totalInvested,
       })
-      .eq('id', existingData.id);
+      .eq('id', existingData.id)
+      .eq('user_id', session.user.id);
 
     if (entryError) {
       toast.error('Failed to sync update. Added to sync queue.');
-      await addToSyncQueue({ type: 'UPDATE_ENTRY', payload: entry, timestamp: Date.now() });
+      await addToSyncQueue(session.user.id, { type: 'UPDATE_ENTRY', payload: entry, timestamp: Date.now() });
       return;
     }
 
     // Replace all expenses
-    await supabase.from('expenses').delete().eq('entry_id', existingData.id);
+    await supabase.from('expenses').delete().eq('entry_id', existingData.id).eq('user_id', session.user.id);
     if (entry.expenses.length > 0) {
       const expensesToInsert = entry.expenses.map((e) => ({
         user_id: session.user.id,
@@ -337,20 +368,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const deleteEntry = async (date: string) => {
     // Optimistic Delete
     setEntries(prev => prev.filter(e => e.date !== date));
-    await deleteOfflineEntry(date);
 
     if (!session?.user?.id) return;
+    await deleteOfflineEntry(session.user.id, date);
 
     if (!isOnline) {
       toast('Deleted offline. Will sync when back online.', { icon: '🔄' });
-      await addToSyncQueue({ type: 'DELETE_ENTRY', payload: { date }, timestamp: Date.now() });
+      await addToSyncQueue(session.user.id, { type: 'DELETE_ENTRY', payload: { date }, timestamp: Date.now() });
       return;
     }
 
     const { error } = await supabase.from('entries').delete().eq('date', date).eq('user_id', session.user.id);
     if (error) {
       toast.error('Failed to sync deletion. Added to sync queue.');
-      await addToSyncQueue({ type: 'DELETE_ENTRY', payload: { date }, timestamp: Date.now() });
+      await addToSyncQueue(session.user.id, { type: 'DELETE_ENTRY', payload: { date }, timestamp: Date.now() });
     } else {
       toast.success('Entry deleted');
     }
@@ -361,9 +392,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       toast.error('Must be online to clear all remote data');
       return;
     }
-    
+
     setEntries([]);
-    await clearOfflineEntries();
+    if (session?.user?.id) await clearOfflineEntries(session.user.id);
 
     if (!session?.user?.id) return;
     const { error } = await supabase.from('entries').delete().eq('user_id', session.user.id);
@@ -435,7 +466,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await clearOfflineEntries();
+    // Wipe this user's entire offline cache (entries + configs + sync
+    // queue) on sign-out so a shared/public device doesn't retain their
+    // plaintext journal data, and so no pending sync-queue item could
+    // ever be replayed against whoever signs in next. Namespacing by
+    // user id (lib/db.ts) already prevents cross-account leakage even
+    // if this wipe is skipped (e.g. the tab closes before it resolves),
+    // but doing it here is good hygiene on a normal, clean logout.
+    const userId = session?.user?.id;
+    if (userId) {
+      await clearAllOfflineData(userId);
+    }
+    setEntries([]);
+    setConfigState(initialMonthConfig);
+    setProfile(null);
     await supabase.auth.signOut();
   };
 

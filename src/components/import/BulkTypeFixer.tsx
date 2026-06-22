@@ -4,18 +4,19 @@ interface BulkTypeFixerProps {
   onApply: (keyword: string, type: 'need' | 'want' | 'investment' | 'savings') => void;
 }
 
+// Generic, broadly-applicable defaults — kept free of any one user's
+// personal expense labels so this is useful out of the box for anyone.
 const SUGGESTIONS: { label: string; type: 'need' | 'want' | 'investment' | 'savings' }[] = [
-  { label: 'loan', type: 'savings' },
   { label: 'rent', type: 'need' },
-  { label: 'creditCardBill', type: 'want' },
-  { label: 'coke', type: 'want' },
-  { label: 'icecream', type: 'want' },
-  { label: 'chips', type: 'want' },
-  { label: 'flipkart', type: 'want' },
-  { label: 'uber', type: 'want' },
+  { label: 'groceries', type: 'need' },
+  { label: 'electricityBill', type: 'need' },
   { label: 'gymMembership', type: 'need' },
   { label: 'gas', type: 'need' },
-  { label: 'suvenduDueForBroker', type: 'savings' },
+  { label: 'loanEmi', type: 'savings' },
+  { label: 'creditCardBill', type: 'want' },
+  { label: 'uber', type: 'want' },
+  { label: 'diningOut', type: 'want' },
+  { label: 'shopping', type: 'want' },
 ];
 
 export const BulkTypeFixer: React.FC<BulkTypeFixerProps> = ({ onApply }) => {
@@ -42,7 +43,7 @@ export const BulkTypeFixer: React.FC<BulkTypeFixerProps> = ({ onApply }) => {
         <div className="flex gap-2 w-full sm:w-auto">
           <select
             value={type}
-            onChange={(e) => setType(e.target.value as any)}
+            onChange={(e) => setType(e.target.value as 'need' | 'want' | 'investment' | 'savings')}
             className="flex-1 sm:w-40 px-4 py-3 bg-background border border-border rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all uppercase tracking-tight"
           >
             <option value="need">Need</option>

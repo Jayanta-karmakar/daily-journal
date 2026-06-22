@@ -21,7 +21,6 @@ const SettingsPage = () => {
   const { entries, config, setConfig, logout, deleteAllEntries, deleteMonthEntries, deleteYearEntries } = useAppContext();
   const { theme, setTheme } = useTheme();
   
-  const [salary, setSalary] = useState(config.salary.toString());
   const [limit, setLimit] = useState(config.dailySpendLimit.toString());
   const [budget, setBudget] = useState(config.monthlyBudget.toString());
   const [currency, setCurrency] = useState(config.currency || 'INR');
@@ -61,7 +60,6 @@ const SettingsPage = () => {
   const handleSave = async () => {
     await setConfig({
       ...config,
-      salary: parseInt(salary) || 0,
       dailySpendLimit: parseInt(limit) || 0,
       monthlyBudget: parseInt(budget) || 0,
       currency: currency,
@@ -132,7 +130,7 @@ const SettingsPage = () => {
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors bg-card shadow-sm">
+          <button onClick={() => navigate(-1)} aria-label="Go back" className="p-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors bg-card shadow-sm">
             <ArrowLeft size={18} />
           </button>
           <div>
@@ -160,20 +158,7 @@ const SettingsPage = () => {
             </div>
           </div>
           <div className="p-6 md:p-8">
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <label className="block">
-                  <span className="text-[10px] font-black text-foreground/60 uppercase tracking-[0.2em] mb-3 block">Monthly Salary</span>
-                  <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm group-focus-within:text-primary transition-colors">{currentCurrency.symbol}</span>
-                    <input type="number" value={salary} onChange={(e) => setSalary(e.target.value)}
-                      className="w-full pl-9 pr-4 py-4 rounded-2xl border border-border bg-background text-base font-black focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-inner" />
-                  </div>
-                  <div className="flex justify-between items-center mt-3 px-1">
-                    <span className="text-[10px] font-bold text-foreground/70 uppercase tracking-tighter">Net take-home</span>
-                    <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">{formatCurrency(parseInt(salary) || 0, currency)}</span>
-                  </div>
-                </label>
-
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <label className="block">
                   <span className="text-[10px] font-black text-foreground/60 uppercase tracking-[0.2em] mb-3 block">Daily Spend Limit</span>
                   <div className="relative group">
@@ -275,9 +260,10 @@ const SettingsPage = () => {
                        placeholder="••••••••"
                        className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all pr-10" 
                      />
-                     <button 
+                     <button
                         type="button"
                         onClick={() => setShowPass(!showPass)}
+                        aria-label={showPass ? 'Hide password' : 'Show password'}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                      >
                        {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
